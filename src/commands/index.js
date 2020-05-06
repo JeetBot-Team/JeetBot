@@ -5,9 +5,12 @@ const userInfo = require('./userInfo');
 const kick = require('./kick');
 const avatar = require('./avatar');
 const prune = require('./prune');
+const ban = require('./ban');
+const mute = require('./mute');
 
 const guildID = process.env.GUILD_ID;
-const botChannel = process.env.CHANNEL_ID;
+const botChannel = process.env.BOT_CHANNEL_ID;
+const generalChannel = process.env.GENERAL_CHANNEL_ID;
 
 const commands = {
     ping, 
@@ -16,17 +19,32 @@ const commands = {
     'user': userInfo,
     kick,
     avatar,
-    prune
+    prune,
+    ban,
+    mute
 };
 
 module.exports = async (msg) => {
 
 	if(msg.guild.id === guildID && msg.channel.id === botChannel) {
         
-        const args = msg.content.split(/ +/);
+        const args = msg.content.split(/ +/); 
 
-        if(args.length === 0 || args[0].charAt(0) !== 'j' || args[0].charAt(1) !== '.') return;
-        const command = args.shift().substr(2);
+        if(args.length === 0 || args[0].charAt(0) !== 'j' || args[0].charAt(1) !== '.') return; 
+        const command = args.shift().substr(2); 
+        
+        if (Object.keys(commands).includes(command)) {
+            commands[command](msg, args);
+        } 
+		
+    }
+    
+    if(msg.guild.id === guildID && msg.channel.id === generalChannel) {
+        
+        const args = msg.content.split(/ +/); 
+
+        if(args.length === 0 || args[0].charAt(0) !== 'j' || args[0].charAt(1) !== '.') return; 
+        const command = args.shift().substr(2); 
         
         if (Object.keys(commands).includes(command)) {
             commands[command](msg, args);
