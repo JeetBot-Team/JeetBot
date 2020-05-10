@@ -12,3 +12,14 @@ module.exports = async (msg) => {
     taggedMember.kick();
     console.log('Moderator has kick someone!');
 };
+/*
+[LAFAYETTE]
+Raise a glass to freedom
+
+[LAURENS/MULLIGAN]
+Hey!
+Something you will never see again!
+
+[MULLIGAN]
+No matter what she tells you
+*/

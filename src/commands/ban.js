@@ -2,7 +2,7 @@ module.exports = async (msg) => {
 
     /*
         Future to add:
-            Error handling to check if user has permissions to use this
+          Error handling to check if user has permissions to use this
     */
 
     if (!msg.mentions.users.size) {
