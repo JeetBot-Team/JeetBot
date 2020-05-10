@@ -3,15 +3,71 @@ require('dotenv').config();
 
 const commandHandler = require('./commands');
 
-const client = new Discord.Client();
+const client = new Discord.Client({ partials: ['MESSAGE', 'REACTION']});
 const cooldowns = new Discord.Collection(); // work on cooldowns later
 
 client.once('ready', () => {
 	console.log('Ready To Rock And Roll!');
 });
 
+// Create an event listener for new guild members
+client.on('guildMemberAdd', member => {
+    // Send the message to a designated channel on a server:
+    const channel = member.guild.channels.cache.find(ch => ch.name === 'welcome');
+    // Do nothing if the channel wasn't found on this server
+    if (!channel) return;
+    // Send the message, mentioning the member
+    channel.send(`Welcome to the CC12 Students Only, ${member}`);
+    channel.send('Please select a role in #role-select by clicking the borb or potatoes emoji');
+});
+
+const roleSelectMessageId = '708954046207098881';
+
+// Adds a Role to user when user uses reaction on role-select
+client.on('messageReactionAdd', async (reaction, user) => {
+
+    let applyRole = async () => {
+        let emojiName = reaction.emoji.name;
+        let role = reaction.message.guild.roles.cache.find(role => role.name.toLowerCase() === emojiName.toLowerCase());
+        let member = reaction.message.guild.members.cache.find(member => member.id === user.id);
+
+        try {
+            if(role && member) {
+                console.log("Role & Member Found!");
+                await member.roles.add(role);
+                console.log("Role added to Member!");
+            }
+        } catch(err) {
+            console.log(err);
+        }
+    }
+
+    if(reaction.message.partial) {
+        console.log("A user reacted to an uncached message");
+        let reactionMessage = await reaction.message.fetch()
+                                .catch(error => {
+                                    console.log('Something went wrong when fetching: ', error);
+                                });
+
+        console.log(reactionMessage.id, "We got the message fetched");
+        if(reactionMessage.id === roleSelectMessageId) {
+            console.log("Passed the fetched message, reactionID = roleSelectID");
+            applyRole();
+        }
+    } else {
+        console.log("The message is not partial.");
+        if(reaction.message.id === roleSelectMessageId) {
+            console.log("Reaction Message = Role Message Id");
+            applyRole();
+        }
+      }
+});
+
+// Command Handler
 client.on('message', commandHandler);
 
+
+// Server Chat Logger
 client.on('message', async message => {
 
     if(message.author.bot) return;
