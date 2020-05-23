@@ -9,7 +9,8 @@ const prune = require('./prune');
 const ban = require('./ban');
 const mute = require('./mute');
 const help = require('./help');
-const embed = require ('./embed');
+const embed = require('./embed');
+const dice = require('./dice');
 
 // Channels
 const guildID = process.env.GUILD_ID;
@@ -27,7 +28,8 @@ const commands = {
     ban,
     mute,
     help,
-    embed
+    embed,
+    dice
 };
 
 module.exports = async (msg) => {
