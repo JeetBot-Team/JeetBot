@@ -1,7 +1,7 @@
 # JeetBot ✨
 
 ## Check out his homepage!
-💠 https://hardcore-snyder-8e382c.netlify.app/ 💠
+💠 https://www.jeetbot.com/ 💠
 
 This was created during our time as students at Code Chrysalis.
 
