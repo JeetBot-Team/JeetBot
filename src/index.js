@@ -7,7 +7,7 @@ const client = new Discord.Client({ partials: ['MESSAGE', 'REACTION']});
 const cooldowns = new Discord.Collection(); // work on cooldowns later
 
 client.once('ready', () => {
-	console.log('Ready To Rock And Roll!');
+	console.log(`${client.user.tag} is Ready To Rock And Roll!`);
 });
 
 // Create an event listener for new guild members
@@ -61,6 +61,16 @@ client.on('messageReactionAdd', async (reaction, user) => {
             applyRole();
         }
       }
+});
+
+client.on('message', (message) => {
+    if(message.author.bot) return;
+
+    const morningMessage = message.content.toLowerCase();
+    
+    if(morningMessage === "good morning jeet!") {
+        message.channel.send(`Good Morning ${message.author.username}`)
+    }
 });
 
 // Command Handler

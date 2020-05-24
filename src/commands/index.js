@@ -17,6 +17,9 @@ const guildID = process.env.GUILD_ID;
 const botChannel = process.env.BOT_CHANNEL_ID;
 const generalChannel = process.env.GENERAL_CHANNEL_ID;
 
+// Prefix
+const PREFIX = process.env.PREFIX;
+
 const commands = {
     ping, 
     '8ball': eightBall,
@@ -40,7 +43,7 @@ module.exports = async (msg) => {
         
         const args = msg.content.split(/ +/); 
 
-        if(args.length === 0 || args[0].charAt(0) !== 'j' || args[0].charAt(1) !== '.') return; 
+        if(args.length === 0 || !args[0].startsWith(PREFIX)) return; 
         const command = args.shift().substr(2); 
         
         if (Object.keys(commands).includes(command)) {
