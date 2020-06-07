@@ -13,15 +13,15 @@ client.once('ready', () => {
 // Create an event listener for new guild members
 client.on('guildMemberAdd', member => {
     // Send the message to a designated channel on a server:
-    const channel = member.guild.channels.cache.find(ch => ch.name === 'welcome');
+    const channel = member.guild.channels.cache.find(ch => ch.name === 'general');
     // Do nothing if the channel wasn't found on this server
     if (!channel) return;
     // Send the message, mentioning the member
-    channel.send(`Welcome to the CC12 Students Only, ${member}`);
-    channel.send('Please select a role in #role-select by clicking the borb or potatoes emoji');
+    channel.send(`Welcome to the Coding Hell Gang ${member}!`);
+    channel.send('Please select a role in #announcements by clicking the chef or wow emoji');
 });
 
-const roleSelectMessageId = '708954046207098881';
+const roleSelectMessageId = '719170733007437886';
 
 // Adds a Role to user when user uses reaction on role-select
 client.on('messageReactionAdd', async (reaction, user) => {
