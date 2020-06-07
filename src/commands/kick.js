@@ -7,9 +7,9 @@ module.exports = async (msg) => {
             return msg.channel.send('You need to tag a user in order to kick them!');
         }
 
-        const taggedUser = msg.mentions.users.first();
+        const taggedUser = msg.mentions.members.first();
 
-        msg.channel.send(`You kicked ${taggedUser.username}`);
+        msg.channel.send(`You kicked ${taggedUser.user.username}`);
         taggedUser.kick();
 
         console.log(`Moderator ${msg.author.username} has kicked ${taggedUser} from ${msg.guild}!`);
