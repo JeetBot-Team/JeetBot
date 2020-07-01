@@ -7,18 +7,21 @@ This was created during our time as students at Code Chrysalis.
 
 ---
 ## Meet Jeet ✨
+![](https://www.jeetbot.com/static/jeet-79249d3d8e1d01706ac4b031646e12df.png)
+
 Jeetbot is a discord bot that helps you with moderation in your discord servers.
 
 Enjoy a variety of commands such as 8ball, embed, and more!
 
+💠 https://www.jeetbot.com/commands 💠
+
 ---
 
-Files that need to be added
+Files that need to be added so it works on your local machine.
 
-* missing .env 
-* needs a bot_token from discord
-* a server_log_id for which channel you want j.listen to send back messages
-* PREFIX in the .env
+* missing .env and needs the following lines
+* "BOT_TOKEN" from Discord
+* "PREFIX" for when initialize commands like 8ball, embed, etc.
 
 ## Getting Started ✨
 ```npm install```
