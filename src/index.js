@@ -1,7 +1,7 @@
 const Discord = require('discord.js');
 require('dotenv').config();
 
-const commandHandler = require('./commands');
+const commandHandler = require('./commands'); // looks for index.js
 
 const client = new Discord.Client({ partials: ['MESSAGE', 'REACTION']});
 const cooldowns = new Discord.Collection(); // work on cooldowns later
@@ -70,6 +70,16 @@ client.on('message', (message) => {
     
     if(morningMessage === "good morning jeet!") {
         message.channel.send(`Good Morning ${message.author.username}`)
+    }
+});
+
+client.on('message', (message) => {
+    if(message.author.bot) return;
+
+    const morningMessage = message.content.toLowerCase();
+    
+    if(morningMessage === "jeet i love you!") {
+        message.channel.send(`I love you too, ${message.author.username}`)
     }
 });
 
