@@ -1,29 +1,12 @@
-/*
-
-This is for editing a welcome message.
-User Types: j.edit
-Jeetbot responses: what would you like your message to be?
-User Types in the welcome message, presses enter.
-Jeetbot collects the message. // Jeetbot listens to the user's event in a specific server and specific channel
-Jeetbot asks in which channel would you like it to go to?
-User responds with a # and channel name "#Welcome"
-Jeetbot saves the channel.
-
-Jeetbot sends this information to the database.
-
-*/
-
 const Discord = require('discord.js');
 const ServerInfo = require('../database/models/dbdiscordserverinfo');
 
 module.exports = async (msg) => {
-
-    // console.log(msg.channel.guild.id, "this is the guild id");
     
     if(msg.member.hasPermission(['BAN_MEMBERS'])) {
         console.log(`${msg.author.username} can manage messages from Discord Server: ${msg.guild}`);
         
-        msg.channel.send(`${msg.author}, what would you like your welcome message to be?`);
+        msg.channel.send(`${msg.author}, what would you like your welcome message to be?\n(Don't forget to end your welcome message with j.end)`);
         let filter = m => !m.author.bot;
         let collector = new Discord.MessageCollector(msg.channel, filter);
 
@@ -58,6 +41,8 @@ module.exports = async (msg) => {
 
                 console.log("Channel has been collected: ", `${channel}`)
 
+                msg.channel.send(`${msg.author}, Thanks I'll remember that!`);
+            
                 collector.stop();
             }
         }); 

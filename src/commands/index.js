@@ -12,6 +12,7 @@ const help = require('./help');
 const embed = require('./embed');
 const dice = require('./dice');
 const edit = require('./edit');
+const roleEmoji = require('./roleEmoji');
 
 // Channels
 // const guildID = process.env.GUILD_ID;
@@ -35,7 +36,8 @@ const commands = {
     help,
     embed,
     dice,
-    edit
+    edit,
+    'roleemoji': roleEmoji
 };
 
 module.exports = async (msg) => {

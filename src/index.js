@@ -47,18 +47,11 @@ client.once('ready', () => {
     console.log(`${client.user.tag} is Ready To Rock And Roll!`);
 });
 
-/*
-
-    If there is a welcome message at all, and if it's not just don't do anything
-    If there is a welcome message, go ahead and do the logic
-
-*/
-
 // Create an event listener for new guild members
 
 client.on('guildMemberAdd', async (member) => {
 
-    console.log(member.guild.id, "<--- this is the guild id");
+    // console.log(member.guild.id, "<--- this is the guild id");
 
     let guildInfo = await ServerInfo.findOne({
         server_id: member.guild.id,
@@ -74,26 +67,42 @@ client.on('guildMemberAdd', async (member) => {
     channel.send(guildInfo.WelcomeMessage.MessageInfo);
 });
 
-// client.on('guildMemberAdd', member => {
-//     // Send the message to a designated channel on a server:
-//     const channel = member.guild.channels.cache.find(ch => ch.name === 'general');
-//     // Do nothing if the channel wasn't found on this server
-//     // console.log(member);
-//     if (!channel) return;
-    
-//     // Send the message, mentioning the member
-//     channel.send(`Welcome to the Coding Hell Gang ${member}!`);
-//     channel.send('Please select a role in #announcements by clicking the chef or wow emoji');
-// });
 
-const roleSelectMessageId = '708954046207098881';
 
 // Adds a Role to user when user uses reaction on role-select
 client.on('messageReactionAdd', async (reaction, user) => {
 
-    let applyRole = async () => {
-        let emojiName = reaction.emoji.name;
-        let role = reaction.message.guild.roles.cache.find(role => role.name.toLowerCase() === emojiName.toLowerCase());
+    let applyRole = async (roleMappings) => {
+
+        // console.log(reaction.emoji.id, "<--- reaction emoji id");
+        // console.log(typeof reaction.emoji.id, "<-- type of reaction emoji id");
+        // console.log(Object.keys(roleMappings[0]), "<--- first key in the rolemappings")
+
+        // let firstKey = Object.keys(roleMappings[0]);
+
+        // console.log(typeof firstKey, "<--- type of first in rolemappings");
+
+        // console.log(reaction.message.guild.roles, "<--- reaction msg guild roles");
+
+        // reaction.emoji.id === roleMappings[0][reaction.emoji.id];
+
+        // console.log("we're in applyRoles");
+
+        let role = undefined;
+        //instead of Number, use parseInt(emojiId, 10)
+        //OR parseFloat(emojiId)
+
+        for(let i = 0; i < roleMappings.length; i++) {
+            let emojiId = Object.keys(roleMappings[i]);
+            //console.log(emojiId, "<-- this is emoji ID within the for loop");
+            //console.log(parseInt(emojiId, 10), "<--- this is the parseInt emoji ID number");
+            if(parseInt(emojiId, 10) === parseInt(reaction.emoji.id, 10)) {
+                role = reaction.message.guild.roles.cache.find(role => role.id === roleMappings[i][emojiId]);
+                // console.log(role, "this is role inside for loop");
+            }
+        }
+        // console.log(role, "<--- This is the role");
+        
         let member = reaction.message.guild.members.cache.find(member => member.id === user.id);
 
         try {
@@ -115,15 +124,36 @@ client.on('messageReactionAdd', async (reaction, user) => {
                                 });
 
         console.log(reactionMessage.id, "We got the message fetched");
+
+        console.log(reactionMessage.guild.id, "<--- This is the guild ID");
+
+        let guildInfo = await ServerInfo.findOne({
+            server_id: reactionMessage.guild.id,
+        });
+
+        let roleSelectMessageId = guildInfo.RoleReactions.Message_ID;
+
+        console.log(roleSelectMessageId, "<--- roleSelectMessageId");
+        console.log(reactionMessage.id, "<--- reactionMessage.id");
+
+        console.log(guildInfo.RoleReactions.RoleMappings, "<---- Role Mappings");
+
         if(reactionMessage.id === roleSelectMessageId) {
             console.log("Passed the fetched message, reactionID = roleSelectID");
-            applyRole();
+            applyRole(guildInfo.RoleReactions.RoleMappings);
         }
     } else {
         console.log("The message is not partial.");
+
+        let guildInfo = await ServerInfo.findOne({
+            server_id: reaction.message.channel.guild.id,
+        });
+
+        let roleSelectMessageId = guildInfo.RoleReactions.Message_ID;
+
         if(reaction.message.id === roleSelectMessageId) {
             console.log("Reaction Message = Role Message Id");
-            applyRole();
+            applyRole(guildInfo.RoleReactions.RoleMappings);
         }
       }
 });
@@ -196,3 +226,14 @@ process.on('unhandledRejection', error => {
 });
 
 client.login(process.env.BOT_TOKEN);
+
+
+
+//no please don't call people tossers
+//I mean my brother is hispanic
+//idk halee hasn't sent any google hangout or nothign
+//OH SHE DID
+//go to slack she put it there
+//just do it
+
+

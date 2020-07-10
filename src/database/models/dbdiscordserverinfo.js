@@ -20,9 +20,9 @@ const DiscordServerInfoSchema = new mongoose.Schema({
 		type: String
 	},
     RoleReactions: { 
-		Message_ID: Number,
+		Message_ID: String,
 		RoleMappings: {
-			type: mongoose.Schema.Types.Mixed
+			type: [mongoose.Schema.Types.Mixed]
 		}			 
 	},
 	WelcomeMessage: {
