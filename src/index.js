@@ -56,19 +56,22 @@ client.once('ready', () => {
 
 // Create an event listener for new guild members
 
-client.on('guildMemberAdd', member => {
+client.on('guildMemberAdd', async (member) => {
 
-    console.log(member);
+    console.log(member.guild.id, "<--- this is the guild id");
+
+    let guildInfo = await ServerInfo.findOne({
+        server_id: member.guild.id,
+    });
 
     // Send the message to a designated channel on a server:
-    const channel = member.guild.channels.cache.find(ch => ch.name === 'general');
+    const channel = member.guild.channels.cache.find(ch => ch.id === guildInfo.WelcomeMessage.WelcomeChannel);
     // Do nothing if the channel wasn't found on this server
     // console.log(member);
     if (!channel) return;
     
     // Send the message, mentioning the member
-    channel.send(`Welcome to the Coding Hell Gang ${member}!`);
-    channel.send('Please select a role in #announcements by clicking the chef or wow emoji');
+    channel.send(guildInfo.WelcomeMessage.MessageInfo);
 });
 
 // client.on('guildMemberAdd', member => {
