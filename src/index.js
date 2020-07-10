@@ -7,7 +7,6 @@ require('dotenv').config();
 
 // MongoDB Info
 const database = require('./database/database');
-const mongoose = require('mongoose');
 const ServerInfo = require('./database/models/dbdiscordserverinfo');
 
 // Handlers
@@ -17,7 +16,6 @@ const commandHandler = require('./commands');
 const cooldowns = new Discord.Collection(); 
 
 client.once('ready', () => {
-    console.log(`${client.user.tag} is Ready To Rock And Roll!`);
     database.then(() => console.log(`${client.user.tag} is connected to MongoDB.`)).catch(err => console.log(err));
 
     client.guilds.cache.map(async (guild) => {
@@ -45,25 +43,48 @@ client.once('ready', () => {
         }
     });
     
-    // console.log(`${client.user.tag} has added all the server he's on to the database.`);
-
+    console.log(`${client.user.tag} has added all the servers he's on to the database.`);
+    console.log(`${client.user.tag} is Ready To Rock And Roll!`);
 });
 
+/*
 
+    If there is a welcome message at all, and if it's not just don't do anything
+    If there is a welcome message, go ahead and do the logic
+
+*/
 
 // Create an event listener for new guild members
+
 client.on('guildMemberAdd', member => {
+
+    console.log(member);
+
     // Send the message to a designated channel on a server:
     const channel = member.guild.channels.cache.find(ch => ch.name === 'general');
     // Do nothing if the channel wasn't found on this server
     // console.log(member);
     if (!channel) return;
+    
     // Send the message, mentioning the member
     channel.send(`Welcome to the Coding Hell Gang ${member}!`);
     channel.send('Please select a role in #announcements by clicking the chef or wow emoji');
 });
 
+// client.on('guildMemberAdd', member => {
+//     // Send the message to a designated channel on a server:
+//     const channel = member.guild.channels.cache.find(ch => ch.name === 'general');
+//     // Do nothing if the channel wasn't found on this server
+//     // console.log(member);
+//     if (!channel) return;
+    
+//     // Send the message, mentioning the member
+//     channel.send(`Welcome to the Coding Hell Gang ${member}!`);
+//     channel.send('Please select a role in #announcements by clicking the chef or wow emoji');
+// });
+
 const roleSelectMessageId = '708954046207098881';
+
 // Adds a Role to user when user uses reaction on role-select
 client.on('messageReactionAdd', async (reaction, user) => {
 
@@ -156,7 +177,8 @@ client.on('message', async message => {
                         .setAuthor(m.author.tag, m.author.displayAvatarURL())
                         .setColor('#68a065')
 
-					destination.send(embed);
+                    destination.send(embed);
+                    console.log(m.content);
                 }
             }
         });

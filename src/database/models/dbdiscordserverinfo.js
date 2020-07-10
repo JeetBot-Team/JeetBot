@@ -25,6 +25,14 @@ const DiscordServerInfoSchema = new mongoose.Schema({
 			type: mongoose.Schema.Types.Mixed
 		}			 
 	},
+	WelcomeMessage: {
+		MessageInfo: {
+			type: String
+		},
+		WelcomeChannel: {
+			type: String
+		}
+	},
 });
 
 
