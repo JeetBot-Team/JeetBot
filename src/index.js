@@ -6,8 +6,6 @@ const client = new Discord.Client({ partials: ['MESSAGE', 'REACTION']});
 require('dotenv').config();
 
 // MongoDB Info
-const database = require('./database/database');
-const ServerInfo = require('./database/models/dbdiscordserverinfo');
 
 // Handlers
 const commandHandler = require('./commands');
@@ -16,47 +14,20 @@ const commandHandler = require('./commands');
 const cooldowns = new Discord.Collection(); 
 
 client.once('ready', () => {
-    database.then(() => console.log(`${client.user.tag} is connected to MongoDB.`)).catch(err => console.log(err));
-
-    client.guilds.cache.map(async (guild) => {
-
-        let guildInfo = await ServerInfo.findOne({
-            server_id: guild.id,
-        });
-
-        if(!guildInfo) {
-            let serverInfo = new ServerInfo({
-                server_id: guild.id,
-                server_name: guild.name,
-                discord_owner_id: guild.ownerID,
-            })
-            
-            try {
-                await serverInfo.save();
-                console.log(`${guild.name} has been saved to the Database`);
-            } catch {
-                err => console.log(err);
-            }
-
-        } else {
-            console.log(`${guild.name} exists in the Database`);
-        }
-    });
-    
     console.log(`${client.user.tag} is Ready To Rock And Roll!`);
 });
 
 // Create an event listener for new guild members
 client.on('guildMemberAdd', async (member) => {
 
-    let guildInfo = await ServerInfo.findOne({
-        server_id: member.guild.id,
-    });
+    // let guildInfo = await ServerInfo.findOne({
+    //     server_id: member.guild.id,
+    // });
 
-    const channel = member.guild.channels.cache.find(ch => ch.id === guildInfo.WelcomeMessage.WelcomeChannel);
-    if (!channel) return;
+    // const channel = member.guild.channels.cache.find(ch => ch.id === guildInfo.WelcomeMessage.WelcomeChannel);
+    // if (!channel) return;
     
-    channel.send(guildInfo.WelcomeMessage.MessageInfo);
+    // channel.send(guildInfo.WelcomeMessage.MessageInfo);
 });
 
 // Adds a Role to user when user uses reaction on role-select
@@ -131,16 +102,6 @@ client.on('messageReactionAdd', async (reaction, user) => {
 
 client.on('message', (message) => {
     if(message.author.bot) return;
-
-    const morningMessage = message.content.toLowerCase();
-    
-    if(morningMessage === "good morning jeet!") {
-        message.channel.send(`Good Morning ${message.author.username}`)
-    }
-
-    if(morningMessage === "jeet i love you!") {
-        message.channel.send(`I love you too, ${message.author.username}`)
-    }
 });
 
 // Command Handler
