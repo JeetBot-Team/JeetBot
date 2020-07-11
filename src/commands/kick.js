@@ -18,15 +18,3 @@ module.exports = async (msg) => {
         return msg.channel.send(`${msg.author.username} does not have the authority to kick someone`);
     }    
 };
-
-/*
-[LAFAYETTE]
-Raise a glass to freedom
-
-[LAURENS/MULLIGAN]
-Hey!
-Something you will never see again!
-
-[MULLIGAN]
-No matter what she tells you
-*/

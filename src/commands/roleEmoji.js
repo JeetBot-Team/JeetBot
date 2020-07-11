@@ -6,7 +6,6 @@ module.exports = async (msg) => {
     if(msg.member.hasPermission(['BAN_MEMBERS'])) {
         console.log(`${msg.author.username} can add roles and add emojis from Discord Server: ${msg.guild}`);
         
-        // turn on your developer settings in so and so? offer small tutorial.
         msg.channel.send(`${msg.author}, which message would you like to use for your role reactions?\nCopy the ID of the message you want to use.`);
         let filter = m => !m.author.bot;
         let collector = new Discord.MessageCollector(msg.channel, filter);
@@ -14,11 +13,7 @@ module.exports = async (msg) => {
         collector.on('collect', async (m, col) => {
             console.log("\nChannel: " + msg.channel.name + "\nUser: " + m.author.tag + "\nMessage: " + m.content);
             
-            // '731175719937507371' but i want to turn string into a number and check if it's only numbers?????
-            // isNaN("48394839") --> false
-            // isNaN("dicks") --> true
             if (msg.author.id === m.author.id && !isNaN(m.content)) {
-                // try to fetch the message off discord? and if it's not able to fetch tell them it's not the right msg id
                 
                 let roleEmojiMsgId = m.content.slice(0);
 

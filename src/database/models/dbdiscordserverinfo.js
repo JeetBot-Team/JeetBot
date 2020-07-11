@@ -19,6 +19,9 @@ const DiscordServerInfoSchema = new mongoose.Schema({
 	last_login: {
 		type: String
 	},
+	ListenInfo: {
+		channel_ID: String,
+	},
     RoleReactions: { 
 		Message_ID: String,
 		RoleMappings: {
