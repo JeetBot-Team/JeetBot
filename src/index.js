@@ -1,34 +1,79 @@
+// Discord Client
 const Discord = require('discord.js');
+const client = new Discord.Client({ partials: ['MESSAGE', 'REACTION']});
+
+// dotenv
 require('dotenv').config();
 
-const commandHandler = require('./commands'); // looks for index.js
+// MongoDB Info
+const database = require('./database/database');
+const ServerInfo = require('./database/models/dbdiscordserverinfo');
 
-const client = new Discord.Client({ partials: ['MESSAGE', 'REACTION']});
-const cooldowns = new Discord.Collection(); // work on cooldowns later
+// Handlers
+const commandHandler = require('./commands');
+
+// cooldowns to fix later
+const cooldowns = new Discord.Collection(); 
 
 client.once('ready', () => {
-	console.log(`${client.user.tag} is Ready To Rock And Roll!`);
+    database.then(() => console.log(`${client.user.tag} is connected to MongoDB.`)).catch(err => console.log(err));
+
+    client.guilds.cache.map(async (guild) => {
+
+        let guildInfo = await ServerInfo.findOne({
+            server_id: guild.id,
+        });
+
+        if(!guildInfo) {
+            let serverInfo = new ServerInfo({
+                server_id: guild.id,
+                server_name: guild.name,
+                discord_owner_id: guild.ownerID,
+            })
+            
+            try {
+                await serverInfo.save();
+                console.log(`${guild.name} has been saved to the Database`);
+            } catch {
+                err => console.log(err);
+            }
+
+        } else {
+            console.log(`${guild.name} exists in the Database`);
+        }
+    });
+    
+    console.log(`${client.user.tag} is Ready To Rock And Roll!`);
 });
 
 // Create an event listener for new guild members
-client.on('guildMemberAdd', member => {
-    // Send the message to a designated channel on a server:
-    const channel = member.guild.channels.cache.find(ch => ch.name === 'general');
-    // Do nothing if the channel wasn't found on this server
-    if (!channel) return;
-    // Send the message, mentioning the member
-    channel.send(`Welcome to the Coding Hell Gang ${member}!`);
-    channel.send('Please select a role in #announcements by clicking the chef or wow emoji');
-});
+client.on('guildMemberAdd', async (member) => {
 
-const roleSelectMessageId = '719170733007437886';
+    let guildInfo = await ServerInfo.findOne({
+        server_id: member.guild.id,
+    });
+
+    const channel = member.guild.channels.cache.find(ch => ch.id === guildInfo.WelcomeMessage.WelcomeChannel);
+    if (!channel) return;
+    
+    channel.send(guildInfo.WelcomeMessage.MessageInfo);
+});
 
 // Adds a Role to user when user uses reaction on role-select
 client.on('messageReactionAdd', async (reaction, user) => {
 
-    let applyRole = async () => {
-        let emojiName = reaction.emoji.name;
-        let role = reaction.message.guild.roles.cache.find(role => role.name.toLowerCase() === emojiName.toLowerCase());
+    let applyRole = async (roleMappings) => {
+
+        let role = undefined;
+
+        for(let i = 0; i < roleMappings.length; i++) {
+            let emojiId = Object.keys(roleMappings[i]);
+        
+            if(parseInt(emojiId, 10) === parseInt(reaction.emoji.id, 10)) {
+                role = reaction.message.guild.roles.cache.find(role => role.id === roleMappings[i][emojiId]);
+            }
+        }
+        
         let member = reaction.message.guild.members.cache.find(member => member.id === user.id);
 
         try {
@@ -50,15 +95,36 @@ client.on('messageReactionAdd', async (reaction, user) => {
                                 });
 
         console.log(reactionMessage.id, "We got the message fetched");
+
+        console.log(reactionMessage.guild.id, "<--- This is the guild ID");
+
+        let guildInfo = await ServerInfo.findOne({
+            server_id: reactionMessage.guild.id,
+        });
+
+        let roleSelectMessageId = guildInfo.RoleReactions.Message_ID;
+
+        console.log(roleSelectMessageId, "<--- roleSelectMessageId");
+        console.log(reactionMessage.id, "<--- reactionMessage.id");
+
+        console.log(guildInfo.RoleReactions.RoleMappings, "<---- Role Mappings");
+
         if(reactionMessage.id === roleSelectMessageId) {
             console.log("Passed the fetched message, reactionID = roleSelectID");
-            applyRole();
+            applyRole(guildInfo.RoleReactions.RoleMappings);
         }
     } else {
         console.log("The message is not partial.");
+
+        let guildInfo = await ServerInfo.findOne({
+            server_id: reaction.message.channel.guild.id,
+        });
+
+        let roleSelectMessageId = guildInfo.RoleReactions.Message_ID;
+
         if(reaction.message.id === roleSelectMessageId) {
             console.log("Reaction Message = Role Message Id");
-            applyRole();
+            applyRole(guildInfo.RoleReactions.RoleMappings);
         }
       }
 });
@@ -71,13 +137,7 @@ client.on('message', (message) => {
     if(morningMessage === "good morning jeet!") {
         message.channel.send(`Good Morning ${message.author.username}`)
     }
-});
 
-client.on('message', (message) => {
-    if(message.author.bot) return;
-
-    const morningMessage = message.content.toLowerCase();
-    
     if(morningMessage === "jeet i love you!") {
         message.channel.send(`I love you too, ${message.author.username}`)
     }
@@ -85,45 +145,6 @@ client.on('message', (message) => {
 
 // Command Handler
 client.on('message', commandHandler);
-
-
-// Server Chat Logger
-client.on('message', async message => {
-
-    if(message.author.bot) return;
-    if(message.content.toLowerCase() === 'j.listen') {
-        
-        message.channel.send('Okay! I am listening now...');
-        console.log("Listening in: " + message.channel.name);
-
-        let filter = m => !m.author.bot;
-		let collector = new Discord.MessageCollector(message.channel, filter);
-		let destination = await client.channels.fetch(process.env.SERVER_LOG_ID)
-		
-        collector.on('collect', (m, col) => {
-            console.log("\nChannel: " + message.channel.name + "\nUser: " + m.author.tag + "\nMessage: " + m.content);
-            if(destination) {
-                if(m.content.toLowerCase() === 'j.stop' && (message.author.id === m.author.id)) {
-                    console.log("Stopping collector.");
-                    collector.stop();
-                }
-                else {
-                    let embed = new Discord.MessageEmbed()
-                        .setTitle(message.channel.name)
-                        .setDescription(m.content)
-                        .setTimestamp()
-                        .setAuthor(m.author.tag, m.author.displayAvatarURL())
-                        .setColor('#68a065')
-
-					destination.send(embed);
-                }
-            }
-        });
-        collector.on('end', collected => {
-            console.log("Messages collected: " + collected.size);
-        }); 
-	}
-});
 
 process.on('unhandledRejection', error => {
 	console.error('Unhandled promise rejection:', error);

@@ -18,22 +18,3 @@ module.exports = async (msg) => {
     await msg.channel.send(`You have muted ${taggedUser}`);
     console.log('Moderator has muted someone!');
 };
-
-/*
-[ELIZA]
-Take a break
-
-[HAMILTON]
-Hey, our kid is pretty great
-
-[ELIZA]
-Run away with us for the summer
-Let’s go upstate
-
-[HAMILTON]
-Eliza, I’ve got so much on my plate
-
-[ELIZA]
-We can all go stay with my father
-There’s a lake I know…
-*/
