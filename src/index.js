@@ -75,6 +75,26 @@ client.on('guildCreate', async (guild) => {
     }
 });
 
+client.on('guildDelete', async (guild) => {
+
+    console.log(`Jeet has been kicked from ${guild.name}`);
+
+    let guildInfo = await ServerInfo.findOne({
+        server_id: guild.id,
+    });
+
+    if(guildInfo) {
+        try {
+            await guildInfo.deleteOne();
+            console.log(`${guild.name} has been deleted from the Database`);
+        } catch {
+            err => console.log(err);
+        }
+    } else {
+        console.log(`${guild.name} does not exist in the Database`);
+    }
+});
+
 // Create an event listener for new guild members
 client.on('guildMemberAdd', async (member) => {
 
