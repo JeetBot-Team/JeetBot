@@ -46,6 +46,35 @@ client.once('ready', () => {
     console.log(`${client.user.tag} is Ready To Rock And Roll!`);
 });
 
+// When Jeet joins a new server
+client.on('guildCreate', async (guild) => {
+
+    console.log(`Jeet has joined a new Discord server: ${guild.name}`);
+
+    let guildInfo = await ServerInfo.findOne({
+        server_id: guild.id,
+    });
+
+    if(!guildInfo) {
+        
+        let serverInfo = new ServerInfo({
+            server_id: guild.id,
+            server_name: guild.name,
+            discord_owner_id: guild.ownerID,
+        });
+        
+        try {
+            await serverInfo.save();
+            console.log(`${guild.name} has been saved to the Database`);
+        } catch {
+            err => console.log(err);
+        }
+
+    } else {
+        console.log(`${guild.name} exists in the Database`);
+    }
+});
+
 // Create an event listener for new guild members
 client.on('guildMemberAdd', async (member) => {
 
@@ -53,7 +82,7 @@ client.on('guildMemberAdd', async (member) => {
         server_id: member.guild.id,
     });
 
-    const channel = member.guild.channels.cache.find(ch => ch.id === guildInfo.WelcomeMessage.WelcomeChannel);
+    let channel = member.guild.channels.cache.find(ch => ch.id === guildInfo.WelcomeMessage.WelcomeChannel);
     if (!channel) return;
     
     channel.send(guildInfo.WelcomeMessage.MessageInfo);

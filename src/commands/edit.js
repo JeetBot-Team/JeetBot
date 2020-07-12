@@ -48,6 +48,6 @@ module.exports = async (msg) => {
         }); 
     } else {
         console.log('This member cannot edit the welcome message');
-        return msg.channel.send(`${msg.author.username} do not have the authority to edit the welcome message`);
+        return msg.channel.send(`${msg.author.username} does not have the authority to edit the welcome message`);
     }    
 };
