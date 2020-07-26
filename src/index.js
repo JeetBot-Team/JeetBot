@@ -75,6 +75,7 @@ client.on('guildCreate', async (guild) => {
     }
 });
 
+// Jeet has been kicked off the server
 client.on('guildDelete', async (guild) => {
 
     console.log(`Jeet has been kicked from ${guild.name}`);
@@ -130,6 +131,67 @@ client.on('messageReactionAdd', async (reaction, user) => {
                 console.log("Role & Member Found!");
                 await member.roles.add(role);
                 console.log("Role added to Member!");
+            }
+        } catch(err) {
+            console.log(err);
+        }
+    }
+
+    if(reaction.message.partial) {
+        console.log("A user reacted to an uncached message");
+        let reactionMessage = await reaction.message.fetch()
+                                .catch(error => {
+                                    console.log('Something went wrong when fetching: ', error);
+                                });
+
+        let guildInfo = await ServerInfo.findOne({
+            server_id: reactionMessage.guild.id,
+        });
+
+        let roleSelectMessageId = guildInfo.RoleReactions.Message_ID;
+
+        if(reactionMessage.id === roleSelectMessageId) {
+            console.log("Passed the fetched message, reactionID = roleSelectID");
+            applyRole(guildInfo.RoleReactions.RoleMappings);
+        }
+    } else {
+        console.log("The message is not partial.");
+
+        let guildInfo = await ServerInfo.findOne({
+            server_id: reaction.message.channel.guild.id,
+        });
+
+        let roleSelectMessageId = guildInfo.RoleReactions.Message_ID;
+
+        if(reaction.message.id === roleSelectMessageId) {
+            console.log("Reaction Message = Role Message Id");
+            applyRole(guildInfo.RoleReactions.RoleMappings);
+        }
+      }
+});
+
+// Removes a Role to user when user uses reaction on role-select
+client.on('messageReactionRemove', async (reaction, user) => {
+
+    let applyRole = async (roleMappings) => {
+
+        let role = undefined;
+
+        for(let i = 0; i < roleMappings.length; i++) {
+            let emojiId = Object.keys(roleMappings[i]);
+        
+            if(parseInt(emojiId, 10) === parseInt(reaction.emoji.id, 10)) {
+                role = reaction.message.guild.roles.cache.find(role => role.id === roleMappings[i][emojiId]);
+            }
+        }
+        
+        let member = reaction.message.guild.members.cache.find(member => member.id === user.id);
+
+        try {
+            if(role && member) {
+                console.log("Role & Member Found!");
+                await member.roles.remove(role);
+                console.log("Role removed to Member!");
             }
         } catch(err) {
             console.log(err);
