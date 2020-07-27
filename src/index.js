@@ -173,7 +173,7 @@ client.on('messageReactionAdd', async (reaction, user) => {
 // Removes a Role to user when user uses reaction on role-select
 client.on('messageReactionRemove', async (reaction, user) => {
 
-    let applyRole = async (roleMappings) => {
+    let removeRole = async (roleMappings) => {
 
         let role = undefined;
 
@@ -213,7 +213,7 @@ client.on('messageReactionRemove', async (reaction, user) => {
 
         if(reactionMessage.id === roleSelectMessageId) {
             console.log("Passed the fetched message, reactionID = roleSelectID");
-            applyRole(guildInfo.RoleReactions.RoleMappings);
+            removeRole(guildInfo.RoleReactions.RoleMappings);
         }
     } else {
         console.log("The message is not partial.");
@@ -226,7 +226,7 @@ client.on('messageReactionRemove', async (reaction, user) => {
 
         if(reaction.message.id === roleSelectMessageId) {
             console.log("Reaction Message = Role Message Id");
-            applyRole(guildInfo.RoleReactions.RoleMappings);
+            removeRole(guildInfo.RoleReactions.RoleMappings);
         }
       }
 });
