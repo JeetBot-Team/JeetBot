@@ -1,9 +1,9 @@
 const Discord = require('discord.js');
-const ServerInfo = require('../database/models/dbdiscordserverinfo');
+const ServerInfo = require('../../database/models/dbdiscordserverinfo');
 
-module.exports = async (msg) => {
+module.exports = async (msg, args, clientServerInfo) => {
     
-    if(msg.member.hasPermission(['BAN_MEMBERS'])) {
+    if(msg.member.hasPermission(['MANAGE_MESSAGES'])) {
         console.log(`${msg.author.username} can manage messages from Discord Server: ${msg.guild}`);
         
         msg.channel.send(`${msg.author}, what would you like your welcome message to be?\n(Don't forget to end your welcome message with j.end)`);
@@ -40,14 +40,12 @@ module.exports = async (msg) => {
                 await guildInfo.save();
 
                 console.log("Channel has been collected: ", `${channel}`)
-
                 msg.channel.send(`${msg.author}, Thanks I'll remember that!`);
-            
                 collector.stop();
             }
         }); 
     } else {
         console.log('This member cannot edit the welcome message');
-        return msg.channel.send(`${msg.author.username} does not have the authority to edit the welcome message`);
+        msg.channel.send(`${msg.author.username} does not have the authority to edit the welcome message`);
     }    
 };

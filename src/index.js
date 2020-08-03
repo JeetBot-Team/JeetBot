@@ -13,37 +13,54 @@ const ServerInfo = require('./database/models/dbdiscordserverinfo');
 const commandHandler = require('./commands');
 
 // cooldowns to fix later
-const cooldowns = new Discord.Collection(); 
+const cooldowns = new Discord.Collection();
 
-client.once('ready', () => {
-    database.then(() => console.log(`${client.user.tag} is connected to MongoDB.`)).catch(err => console.log(err));
+// local storage
+let clientSideStorage = new Map();
 
-    client.guilds.cache.map(async (guild) => {
+// redux store
+const store = require('./redux/store');
 
-        let guildInfo = await ServerInfo.findOne({
-            server_id: guild.id,
-        });
+client.once('ready', async () => {
+		
+  database.then(() => console.log(`${client.user.tag} is connected to MongoDB.`)).catch(err => console.log(err));
 
-        if(!guildInfo) {
-            let serverInfo = new ServerInfo({
-                server_id: guild.id,
-                server_name: guild.name,
-                discord_owner_id: guild.ownerID,
-            })
-            
-            try {
-                await serverInfo.save();
-                console.log(`${guild.name} has been saved to the Database`);
-            } catch {
-                err => console.log(err);
-            }
+		try {
+			await Promise.all(client.guilds.cache.map(async (guild) => {
 
-        } else {
-            console.log(`${guild.name} exists in the Database`);
-        }
-    });
-    
-    console.log(`${client.user.tag} is Ready To Rock And Roll!`);
+				let guildInfo = await ServerInfo.findOne({
+					server_id: guild.id,
+				});
+
+				if (!guildInfo) {
+					let serverInfo = new ServerInfo({
+						server_id: guild.id,
+						server_name: guild.name,
+						discord_owner_id: guild.ownerID,
+					});
+
+					try {
+						await serverInfo.save();
+						clientSideStorage.set(guild.id, {
+							server_id: guild.id,
+							server_name: guild.name,
+							discord_owner_id: guild.ownerID
+						});
+						console.log(`${guild.name} has been saved to the Database`);
+					}	catch {
+							err => console.log(err);
+						}
+				}	else {					
+						clientSideStorage.set(guildInfo.server_id, guildInfo);
+						console.log(`${guild.name} exists in the Database`);
+				}
+			}));
+		} catch {
+				err => console.log(err);
+		} finally {
+				console.log("*** This is the Store's status ***\n", store.getState());
+				console.log(`${client.user.tag} is Ready To Rock And Roll!`);	
+		}
 });
 
 // When Jeet joins a new server
@@ -65,7 +82,13 @@ client.on('guildCreate', async (guild) => {
         
         try {
             await serverInfo.save();
-            console.log(`${guild.name} has been saved to the Database`);
+            clientSideStorage.set(guild.id, {
+                server_id: guild.id,
+                server_name: guild.name,
+                discord_owner_id: guild.ownerID
+						});
+						// add it to the redux store as well
+            console.log(`${guild.name} has been saved to the Database && Client Side Storage`);
         } catch {
             err => console.log(err);
         }
@@ -86,6 +109,8 @@ client.on('guildDelete', async (guild) => {
 
     if(guildInfo) {
         try {
+						// remove it from the redux store as well
+            clientSideStorage.delete(guild.id);
             await guildInfo.deleteOne();
             console.log(`${guild.name} has been deleted from the Database`);
         } catch {
@@ -99,14 +124,40 @@ client.on('guildDelete', async (guild) => {
 // Create an event listener for new guild members
 client.on('guildMemberAdd', async (member) => {
 
-    let guildInfo = await ServerInfo.findOne({
-        server_id: member.guild.id,
-    });
-
-    let channel = member.guild.channels.cache.find(ch => ch.id === guildInfo.WelcomeMessage.WelcomeChannel);
-    if (!channel) return;
+    let clientGuildInfo = clientSideStorage.get(member.guild.id);
     
-    channel.send(guildInfo.WelcomeMessage.MessageInfo);
+    // console.log(clientGuildInfo, "<-- clientGuildInfo");
+    
+    if(clientGuildInfo) {
+        // here is where I would use the state to see if the message has been updated recently
+        // if it is, then I would fetch from the database, if it has not been updated and it's still the same, go ahead with clientSideStorage
+        if(clientGuildInfo.WelcomeMessage.WelcomeChannel) {
+            let channel = member.guild.channels.cache.find(ch => ch.id === clientGuildInfo.WelcomeMessage.WelcomeChannel);
+            if (!channel) return;
+
+            channel.send(clientGuildInfo.WelcomeMessage.MessageInfo);
+        } else {
+            return;
+        }
+    } else {
+        console.log(`Jeet cannot find this server ${member.guild.id} in the client side storage.`)
+        let guildInfo = await ServerInfo.findOne({
+            server_id: member.guild.id,
+        });
+
+        clientSideStorage.set(member.guild.id, guildInfo);
+
+        if(guildInfo.WelcomeMessage.WelcomeChannel) {
+            let channel = member.guild.channels.cache.find(ch => ch.id === guildInfo.WelcomeMessage.WelcomeChannel);
+            if (!channel) return;
+
+            channel.send(guildInfo.WelcomeMessage.MessageInfo);
+        } else {
+            return;
+        }
+
+    }
+    
 });
 
 // Adds a Role to user when user uses reaction on role-select
@@ -231,22 +282,70 @@ client.on('messageReactionRemove', async (reaction, user) => {
       }
 });
 
-client.on('message', (message) => {
+// Jeet custom messages & Ffej message eater
+client.on('message', async (message) => {
     if(message.author.bot) return;
 
-    const morningMessage = message.content.toLowerCase();
-    
-    if(morningMessage === "good morning jeet!") {
-        message.channel.send(`Good Morning ${message.author.username}`)
-    }
+		// store.dispatch(guildSlice.actions.eat_true());
+		// console.log(store.getState(), "This is the state within the message object after eat_true is called");
 
-    if(morningMessage === "jeet i love you!") {
+		// store.dispatch(guildSlice.actions.eat_false());
+		// console.log(store.getState(), "This is the state after it becomes false");
+
+		// console.log(guildIdSelector(store.getState()), "<-- guild ID selector");
+
+    const specialMessage = message.content.toLowerCase();
+    
+    if(specialMessage === "good morning jeet!") {
+        message.channel.send(`Good Morning ${message.author.username}`)
+     }
+
+    if(specialMessage === "jeet i love you!") {
         message.channel.send(`I love you too, ${message.author.username}`)
+		}
+		
+		// if(specialMessage === "jeet we're testing!") {
+		// 	 message.channel.send(`Okay pops, we're testing some features!`);
+		// 	 console.log(store.getState(), "this is the store's state in jeet we're testing");
+		// }
+
+		// if(specialMessage === "jeet show me the store") {
+		// 	message.channel.send(`Okay pops, the contains of the store is sent to the console!`);
+		// 	console.log(store, "this is the store completely");
+		// }
+
+		// if(specialMessage === "jeet show the store dispatch") {
+		// 	message.channel.send(`Okay pops, showing you the store dispatch within the console`);
+		// 	console.log(store.dispatch, "this is the store dispatch");
+		// }
+    
+    // console.log(clientSideStorage, "<-- this is the clientSideStorage");
+
+    let guildInfo = await ServerInfo.findOne({
+        server_id: message.channel.guild.id,
+    });
+
+    member = message.guild.members.cache.find(member => member.id === message.author.id);
+    role = message.guild.roles.cache.find(role => role.id === guildInfo.EatRole);
+
+    // console.log(role, "this is the role within guildInfo");
+    // console.log(member._roles, "this is the member roles");
+    if(member && role) {
+      if(member._roles.includes(role.id)) {
+          console.log(`${message.author.username} in ${message.channel.guild.name} has a chance to get their messages eaten by Ffej.`);
+          let chance = Math.floor(Math.random() * 100) + 1;
+          
+          if(chance > 0 && chance <= 15) {
+            message.delete().then(msg => console.log(`Ffej has deleted message from ${msg.author.username} in Discord Server: ${msg.channel.guild.name}`)).catch(err => console.log(err));
+          }
+      }  
     }
 });
 
 // Command Handler
-client.on('message', commandHandler);
+client.on('message', async (msg) => {
+    commandHandler(msg, clientSideStorage.get(msg.channel.guild.id));
+});
 
 process.on('unhandledRejection', error => {
 	console.error('Unhandled promise rejection:', error);

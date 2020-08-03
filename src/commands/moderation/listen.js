@@ -1,9 +1,9 @@
 const Discord = require('discord.js');
-const ServerInfo = require('../database/models/dbdiscordserverinfo');
+const ServerInfo = require('../../database/models/dbdiscordserverinfo');
 
 module.exports = async (msg) => {
     
-    if(msg.member.hasPermission(['BAN_MEMBERS'])) {
+    if(msg.member.hasPermission(['MANAGE_MESSAGES'])) {
         if(msg.author.bot) return;
         console.log(`${msg.author.username} can manage messages from Discord Server: ${msg.guild}`);
 

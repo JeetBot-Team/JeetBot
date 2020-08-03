@@ -1,9 +1,9 @@
 const Discord = require('discord.js');
-const ServerInfo = require('../database/models/dbdiscordserverinfo');
+const ServerInfo = require('../../database/models/dbdiscordserverinfo');
 
 module.exports = async (msg) => {
     
-    if(msg.member.hasPermission(['BAN_MEMBERS'])) {
+    if(msg.member.hasPermission(['MANAGE_ROLES'])) {
         console.log(`${msg.author.username} can add roles and add emojis from Discord Server: ${msg.guild}`);
         
         msg.channel.send(`${msg.author}, which message would you like to use for your role reactions?\nCopy the ID of the message you want to use.`);
