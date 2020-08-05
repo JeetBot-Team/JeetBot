@@ -169,7 +169,7 @@ client.on('messageReactionAdd', async (reaction, user) => {
       }
 });
 
-client.on('message', (message) => {
+client.on('message', async (message) => {
     if(message.author.bot) return;
 
     const morningMessage = message.content.toLowerCase();

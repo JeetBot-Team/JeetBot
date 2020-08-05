@@ -1,5 +1,5 @@
 const Discord = require('discord.js');
-const ServerInfo = require('../../database/models/dbdiscordserverinfo');
+const ServerInfo = require('../database/models/dbdiscordserverinfo');
 
 module.exports = async (msg) => {
     
