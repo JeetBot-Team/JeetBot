@@ -181,6 +181,24 @@ client.on('message', (message) => {
     if(morningMessage === "jeet i love you!") {
         message.channel.send(`I love you too, ${message.author.username}`)
     }
+
+    let guildInfo = await ServerInfo.findOne({
+        server_id: message.channel.guild.id,
+    });
+
+    member = message.guild.members.cache.find(member => member.id === message.author.id);
+    role = message.guild.roles.cache.find(role => role.id === guildInfo.EatRole);
+
+    if(member && role) {
+      if(member._roles.includes(role.id)) {
+          console.log(`${message.author.username} in ${message.channel.guild.name} has a chance to get their messages eaten by Ffej.`);
+          let chance = Math.floor(Math.random() * 100) + 1;
+          
+          if(chance > 0 && chance <= 15) {
+            message.delete().then(msg => console.log(`Ffej has deleted message from ${msg.author.username} in Discord Server: ${msg.channel.guild.name}`)).catch(err => console.log(err));
+          }
+      }  
+    }
 });
 
 // Command Handler
