@@ -20,6 +20,7 @@ let clientSideStorage = new Map();
 
 // redux store
 const store = require('./redux/store');
+const { guildsSelector, guildsSlice, guildAdded } = require('./redux/guildsSlice');
 
 client.once('ready', async () => {
 		
@@ -46,12 +47,13 @@ client.once('ready', async () => {
 							server_name: guild.name,
 							discord_owner_id: guild.ownerID
 						});
+						// need to add to the redux store
 						console.log(`${guild.name} has been saved to the Database`);
 					}	catch {
 							err => console.log(err);
 						}
 				}	else {					
-						clientSideStorage.set(guildInfo.server_id, guildInfo);
+						clientSideStorage.set(guildInfo.server_id, guildInfo._id);
 						console.log(`${guild.name} exists in the Database`);
 				}
 			}));
@@ -59,6 +61,31 @@ client.once('ready', async () => {
 				err => console.log(err);
 		} finally {
 				console.log("*** This is the Store's status ***\n", store.getState());
+
+				// console.log(clientSideStorage, "<-- this is the clientSideStorage");
+				
+
+				// let serverObjId = clientSideStorage.get('579360721574297601');
+				// console.log(serverObjId, "<-- serverObjId");
+
+				// console.log(guildsSelector.selectAll(store.getState()), "<-- this is the guild Select All method");
+				// console.log(guildsSelector.selectById(store.getState(), serverObjId));
+
+				let guildInRedux = guildsSelector.selectById(store.getState(), clientSideStorage.get('579360721574297601'));
+				console.log(guildInRedux);
+
+				let sampleGuild = {
+					_id: "1234506125",
+					server_id: "123456789",
+					server_name: "test_Server",
+					discord_owner_id: "91245219"
+				}
+
+				store.dispatch(guildAdded(sampleGuild));
+
+				// console.log(guildsSelector.selectById(store.getState(), "1234506125"));
+
+
 				console.log(`${client.user.tag} is Ready To Rock And Roll!`);	
 		}
 });
@@ -88,7 +115,7 @@ client.on('guildCreate', async (guild) => {
                 discord_owner_id: guild.ownerID
 						});
 						// add it to the redux store as well
-            console.log(`${guild.name} has been saved to the Database && Client Side Storage`);
+            console.log(`${guild.name} has been saved to the Database && Redux Store`);
         } catch {
             err => console.log(err);
         }
@@ -124,7 +151,7 @@ client.on('guildDelete', async (guild) => {
 // Create an event listener for new guild members
 client.on('guildMemberAdd', async (member) => {
 
-    let clientGuildInfo = clientSideStorage.get(member.guild.id);
+		let clientGuildInfo = guildsSelector.selectById(store.getState(), clientSideStorage.get(member.guild.id));
     
     // console.log(clientGuildInfo, "<-- clientGuildInfo");
     
@@ -145,8 +172,9 @@ client.on('guildMemberAdd', async (member) => {
             server_id: member.guild.id,
         });
 
-        clientSideStorage.set(member.guild.id, guildInfo);
-
+				clientSideStorage.set(member.guild.id, guildInfo._id);
+				// Add to Redux store guildsSelector.selectById(store.getState(), clientSideStorage.get(member.guild.id));
+        
         if(guildInfo.WelcomeMessage.WelcomeChannel) {
             let channel = member.guild.channels.cache.find(ch => ch.id === guildInfo.WelcomeMessage.WelcomeChannel);
             if (!channel) return;
@@ -344,7 +372,7 @@ client.on('message', async (message) => {
 
 // Command Handler
 client.on('message', async (msg) => {
-    commandHandler(msg, clientSideStorage.get(msg.channel.guild.id));
+    commandHandler(msg, clientSideStorage.get(msg.channel.guild.id), store);
 });
 
 process.on('unhandledRejection', error => {

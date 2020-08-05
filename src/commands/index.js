@@ -49,7 +49,7 @@ const commands = {
     patpat
 };
 
-module.exports = async (msg, serverInfo) => {    
+module.exports = async (msg, serverInfo, store) => {    
     const args = msg.content.split(/ +/); 
 
     if(args.length === 0 || !args[0].startsWith(PREFIX)) return; 
