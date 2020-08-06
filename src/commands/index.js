@@ -14,6 +14,7 @@ const dice = require('./dice');
 const edit = require('./edit');
 const roleEmoji = require('./roleEmoji');
 const listen = require('./listen');
+const eat = require('./eat');
 
 // Prefix
 const PREFIX = process.env.PREFIX;
@@ -33,7 +34,8 @@ const commands = {
     dice,
     edit,
     'roleemoji': roleEmoji,
-    listen
+    listen,
+    eat
 };
 
 module.exports = async (msg) => {    

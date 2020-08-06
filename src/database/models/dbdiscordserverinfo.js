@@ -36,6 +36,9 @@ const DiscordServerInfoSchema = new mongoose.Schema({
 			type: String
 		}
 	},
+	EatRole: {
+		type: String
+	}
 });
 
 
