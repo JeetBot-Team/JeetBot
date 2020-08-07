@@ -249,68 +249,6 @@ client.on('messageReactionAdd', async (reaction, user) => {
       }
 });
 
-// Removes a Role to user when user uses reaction on role-select
-client.on('messageReactionRemove', async (reaction, user) => {
-
-    let removeRole = async (roleMappings) => {
-
-        let role = undefined;
-
-        for(let i = 0; i < roleMappings.length; i++) {
-            let emojiId = Object.keys(roleMappings[i]);
-        
-            if(parseInt(emojiId, 10) === parseInt(reaction.emoji.id, 10)) {
-                role = reaction.message.guild.roles.cache.find(role => role.id === roleMappings[i][emojiId]);
-            }
-        }
-        
-        let member = reaction.message.guild.members.cache.find(member => member.id === user.id);
-
-        try {
-            if(role && member) {
-                console.log("Role & Member Found!");
-                await member.roles.remove(role);
-                console.log("Role removed to Member!");
-            }
-        } catch(err) {
-            console.log(err);
-        }
-    }
-
-    if(reaction.message.partial) {
-        console.log("A user reacted to an uncached message");
-        let reactionMessage = await reaction.message.fetch()
-                                .catch(error => {
-                                    console.log('Something went wrong when fetching: ', error);
-                                });
-
-        let guildInfo = await ServerInfo.findOne({
-            server_id: reactionMessage.guild.id,
-        });
-
-        let roleSelectMessageId = guildInfo.RoleReactions.Message_ID;
-
-        if(reactionMessage.id === roleSelectMessageId) {
-            console.log("Passed the fetched message, reactionID = roleSelectID");
-            removeRole(guildInfo.RoleReactions.RoleMappings);
-        }
-    } else {
-        console.log("The message is not partial.");
-
-        let guildInfo = await ServerInfo.findOne({
-            server_id: reaction.message.channel.guild.id,
-        });
-
-        let roleSelectMessageId = guildInfo.RoleReactions.Message_ID;
-
-        if(reaction.message.id === roleSelectMessageId) {
-            console.log("Reaction Message = Role Message Id");
-            removeRole(guildInfo.RoleReactions.RoleMappings);
-        }
-      }
-});
-
-// Jeet custom messages & Ffej message eater
 client.on('message', async (message) => {
     if(message.author.bot) return;
 
@@ -358,6 +296,24 @@ client.on('message', async (message) => {
 
     // console.log(role, "this is the role within guildInfo");
     // console.log(member._roles, "this is the member roles");
+    if(member && role) {
+      if(member._roles.includes(role.id)) {
+          console.log(`${message.author.username} in ${message.channel.guild.name} has a chance to get their messages eaten by Ffej.`);
+          let chance = Math.floor(Math.random() * 100) + 1;
+          
+          if(chance > 0 && chance <= 15) {
+            message.delete().then(msg => console.log(`Ffej has deleted message from ${msg.author.username} in Discord Server: ${msg.channel.guild.name}`)).catch(err => console.log(err));
+          }
+      }  
+    }
+
+    let guildInfo = await ServerInfo.findOne({
+        server_id: message.channel.guild.id,
+    });
+
+    member = message.guild.members.cache.find(member => member.id === message.author.id);
+    role = message.guild.roles.cache.find(role => role.id === guildInfo.EatRole);
+
     if(member && role) {
       if(member._roles.includes(role.id)) {
           console.log(`${message.author.username} in ${message.channel.guild.name} has a chance to get their messages eaten by Ffej.`);
