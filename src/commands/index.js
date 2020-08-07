@@ -9,7 +9,6 @@ const userInfo = require('./info/userInfo');
 
 // misc commands
 const embed = require('./embed');
-<<<<<<< HEAD
 
 // fun commands
 const dice = require('./fun/dice');
@@ -25,14 +24,6 @@ const listen = require('./moderation/listen');
 const mute = require('./moderation/mute');
 const prune = require('./moderation/prune');
 const roleEmoji = require('./moderation/roleEmoji');
-
-=======
-const dice = require('./dice');
-const edit = require('./edit');
-const roleEmoji = require('./roleEmoji');
-const listen = require('./listen');
-const eat = require('./eat');
->>>>>>> d9db12820714633389733b45a6316578eb7bdde3
 
 // Prefix
 const PREFIX = process.env.PREFIX;
@@ -53,12 +44,7 @@ const commands = {
     edit,
     'roleemoji': roleEmoji,
     listen,
-<<<<<<< HEAD
-    eat,
-    patpat
-=======
     eat
->>>>>>> d9db12820714633389733b45a6316578eb7bdde3
 };
 
 module.exports = async (msg, serverInfo, store) => {    

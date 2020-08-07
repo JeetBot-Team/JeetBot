@@ -25,7 +25,6 @@ const guildsSlice = createSlice({
     initialState: guildsAdapter.getInitialState(),
     reducers: {
       guildAdded(state, action) {
-        // console.log("we're here in guildAdded");
         guildsAdapter.addOne(state, action.payload);
       },
       guildsLoaded(state, action) {
@@ -46,11 +45,6 @@ const guildsSlice = createSlice({
       [fetchAllGuilds.fulfilled]: (state, action) => {
         console.log("The function fetchAllGuilds has been fulfilled");
       },
-      // [fetchOneGuild.fulfilled]: (state, action) => {
-      //   console.log("*** This is the state in fetchOneGuilds.fulfilled ***\n", state);
-      //   console.log("*** This is the action in fetchOneGuilds.fulfilled ***\n", action);
-      //   // state.entities.push(action.payload)
-      // }
     }
 });
 

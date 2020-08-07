@@ -22,6 +22,8 @@ let clientSideStorage = new Map();
 const store = require('./redux/store');
 const { guildsSelector, guildsSlice, guildAdded } = require('./redux/guildsSlice');
 
+// When the bot turns on
+// Turn on the connection to DB and retrieve all Discord Servers and their specialized info 
 client.once('ready', async () => {
 		
   database.then(() => console.log(`${client.user.tag} is connected to MongoDB.`)).catch(err => console.log(err));
@@ -47,7 +49,7 @@ client.once('ready', async () => {
 							server_name: guild.name,
 							discord_owner_id: guild.ownerID
 						});
-						// need to add to the redux store
+						// need to add to Redux store here
 						console.log(`${guild.name} has been saved to the Database`);
 					}	catch {
 							err => console.log(err);
@@ -61,31 +63,6 @@ client.once('ready', async () => {
 				err => console.log(err);
 		} finally {
 				console.log("*** This is the Store's status ***\n", store.getState());
-
-				// console.log(clientSideStorage, "<-- this is the clientSideStorage");
-				
-
-				// let serverObjId = clientSideStorage.get('579360721574297601');
-				// console.log(serverObjId, "<-- serverObjId");
-
-				// console.log(guildsSelector.selectAll(store.getState()), "<-- this is the guild Select All method");
-				// console.log(guildsSelector.selectById(store.getState(), serverObjId));
-
-				let guildInRedux = guildsSelector.selectById(store.getState(), clientSideStorage.get('579360721574297601'));
-				console.log(guildInRedux);
-
-				let sampleGuild = {
-					_id: "1234506125",
-					server_id: "123456789",
-					server_name: "test_Server",
-					discord_owner_id: "91245219"
-				}
-
-				store.dispatch(guildAdded(sampleGuild));
-
-				// console.log(guildsSelector.selectById(store.getState(), "1234506125"));
-
-
 				console.log(`${client.user.tag} is Ready To Rock And Roll!`);	
 		}
 });
@@ -108,14 +85,14 @@ client.on('guildCreate', async (guild) => {
         });
         
         try {
-            await serverInfo.save();
-            clientSideStorage.set(guild.id, {
-                server_id: guild.id,
-                server_name: guild.name,
-                discord_owner_id: guild.ownerID
-						});
-						// add it to the redux store as well
-            console.log(`${guild.name} has been saved to the Database && Redux Store`);
+          await serverInfo.save();
+          clientSideStorage.set(guild.id, {
+              server_id: guild.id,
+              server_name: guild.name,
+              discord_owner_id: guild.ownerID
+			});
+					// add it to the redux store as well
+           console.log(`${guild.name} has been saved to the Database && Redux Store`);
         } catch {
             err => console.log(err);
         }
@@ -148,24 +125,20 @@ client.on('guildDelete', async (guild) => {
     }
 });
 
-// Create an event listener for new guild members
+// An event listener for new guild members
 client.on('guildMemberAdd', async (member) => {
 
 		let clientGuildInfo = guildsSelector.selectById(store.getState(), clientSideStorage.get(member.guild.id));
     
-    // console.log(clientGuildInfo, "<-- clientGuildInfo");
-    
     if(clientGuildInfo) {
-        // here is where I would use the state to see if the message has been updated recently
-        // if it is, then I would fetch from the database, if it has not been updated and it's still the same, go ahead with clientSideStorage
-        if(clientGuildInfo.WelcomeMessage.WelcomeChannel) {
-            let channel = member.guild.channels.cache.find(ch => ch.id === clientGuildInfo.WelcomeMessage.WelcomeChannel);
-            if (!channel) return;
+      if(clientGuildInfo.WelcomeMessage.WelcomeChannel) {
+        let channel = member.guild.channels.cache.find(ch => ch.id === clientGuildInfo.WelcomeMessage.WelcomeChannel);
+        if (!channel) return;
 
-            channel.send(clientGuildInfo.WelcomeMessage.MessageInfo);
-        } else {
-            return;
-        }
+        channel.send(clientGuildInfo.WelcomeMessage.MessageInfo);
+      } else {
+      	  return;
+      }
     } else {
         console.log(`Jeet cannot find this server ${member.guild.id} in the client side storage.`)
         let guildInfo = await ServerInfo.findOne({
@@ -249,16 +222,9 @@ client.on('messageReactionAdd', async (reaction, user) => {
       }
 });
 
+// Special Messages and EatRole Handler
 client.on('message', async (message) => {
     if(message.author.bot) return;
-
-		// store.dispatch(guildSlice.actions.eat_true());
-		// console.log(store.getState(), "This is the state within the message object after eat_true is called");
-
-		// store.dispatch(guildSlice.actions.eat_false());
-		// console.log(store.getState(), "This is the state after it becomes false");
-
-		// console.log(guildIdSelector(store.getState()), "<-- guild ID selector");
 
     const specialMessage = message.content.toLowerCase();
     
@@ -269,23 +235,6 @@ client.on('message', async (message) => {
     if(specialMessage === "jeet i love you!") {
         message.channel.send(`I love you too, ${message.author.username}`)
 		}
-		
-		// if(specialMessage === "jeet we're testing!") {
-		// 	 message.channel.send(`Okay pops, we're testing some features!`);
-		// 	 console.log(store.getState(), "this is the store's state in jeet we're testing");
-		// }
-
-		// if(specialMessage === "jeet show me the store") {
-		// 	message.channel.send(`Okay pops, the contains of the store is sent to the console!`);
-		// 	console.log(store, "this is the store completely");
-		// }
-
-		// if(specialMessage === "jeet show the store dispatch") {
-		// 	message.channel.send(`Okay pops, showing you the store dispatch within the console`);
-		// 	console.log(store.dispatch, "this is the store dispatch");
-		// }
-    
-    // console.log(clientSideStorage, "<-- this is the clientSideStorage");
 
     let guildInfo = await ServerInfo.findOne({
         server_id: message.channel.guild.id,
@@ -294,8 +243,6 @@ client.on('message', async (message) => {
     member = message.guild.members.cache.find(member => member.id === message.author.id);
     role = message.guild.roles.cache.find(role => role.id === guildInfo.EatRole);
 
-    // console.log(role, "this is the role within guildInfo");
-    // console.log(member._roles, "this is the member roles");
     if(member && role) {
       if(member._roles.includes(role.id)) {
           console.log(`${message.author.username} in ${message.channel.guild.name} has a chance to get their messages eaten by Ffej.`);
