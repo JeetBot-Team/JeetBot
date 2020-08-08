@@ -44,7 +44,8 @@ const commands = {
     edit,
     'roleemoji': roleEmoji,
     listen,
-    eat
+    eat,
+    patpat
 };
 
 module.exports = async (msg, store) => {    
