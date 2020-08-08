@@ -1,7 +1,9 @@
 const Discord = require('discord.js');
 const ServerInfo = require('../../database/models/dbdiscordserverinfo');
+// const { guildListenInfoUpdated } = require("../../redux/guildsSlice");
+// need to add case when the bot goes down, to re-activate the listen bot on boot up
 
-module.exports = async (msg) => {
+module.exports = async (msg, args, store) => {
     
     if(msg.member.hasPermission(['MANAGE_MESSAGES'])) {
         if(msg.author.bot) return;
@@ -20,7 +22,7 @@ module.exports = async (msg) => {
           destination = await msg.guild.channels.cache.find(ch => ch.id === guildInfo.ListenInfo.channel_ID);
           msg.channel.send(`${msg.author}, I'm listening now to ${msg.channel}.\nIf you want to change where I'm sending messages to, type j.channel #channel`);
         } else if (!guildInfo.ListenInfo.channel_ID) {
-            msg.channel.send(`${msg.author}, which channel do you want send listened messages to?\nPlease enter j.channel #channel.`);
+        	msg.channel.send(`${msg.author}, which channel do you want send listened messages to?\nPlease enter j.channel #channel.`);
         }
 
         collector.on('collect', async (m, col) => {

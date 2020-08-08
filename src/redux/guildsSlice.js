@@ -1,65 +1,81 @@
-const { createSlice, createEntityAdapter, createAsyncThunk } = require('@reduxjs/toolkit');
-
-// const database = require('../database/database');
-const ServerInfo = require('../database/models/dbdiscordserverinfo');
+const { createSlice, createEntityAdapter } = require('@reduxjs/toolkit');
 
 const guildsAdapter = createEntityAdapter();
-
 const guildsSelector = guildsAdapter.getSelectors(state => state.guilds)
 
-const fetchAllGuilds = createAsyncThunk(
-    'guilds/fetchAllGuilds', 
-    async (arg, thunkAPI) => {
-      const response = await ServerInfo.find({});
-      if(response) {
-        thunkAPI.dispatch(guildsSlice.actions.guildsLoaded(response));
-        return response;
-      } else {
-        return;
-      }
-    }
-);
+const selectId = (instance) => {
+  return instance._id;
+}
 
 const guildsSlice = createSlice({
     name: 'guilds',
     initialState: guildsAdapter.getInitialState(),
     reducers: {
       guildAdded(state, action) {
+        const id = selectId(action.payload);
+        action.payload.id = id;
         guildsAdapter.addOne(state, action.payload);
       },
-      guildsLoaded(state, action) {
-        guildsAdapter.setAll(state, action.payload);
-      },
       guildRemoved(state, action) {
+        const id = selectId(action.payload);
+        action.payload.id = id;
         guildsAdapter.removeOne(state, action.payload);
       },
-      guildEatUpdated(state, action) {
-        const {id, value} = action.payload;
-        const guild = state.entities[id];
+      guildEatRoleUpdated(state, action) {
+        const {_id, EatRole} = action.payload;
+        const guild = state.entities[_id];
         if(guild) {
-          guild.eat_updated = value;
+          guild.EatRole = EatRole;
         }
       },
-    },
-    extraReducers: {
-      [fetchAllGuilds.fulfilled]: (state, action) => {
-        console.log("The function fetchAllGuilds has been fulfilled");
+      guildWelcomeMessageUpdated(state, action) {
+        const {_id, WelcomeMessage } = action.payload;
+        const guild = state.entities[_id];
+        if(guild) {
+          if(guild.WelcomeMessage.MessageInfo !== WelcomeMessage.MessageInfo) {
+            guild.WelcomeMessage.MessageInfo = WelcomeMessage.MessageInfo;
+          }
+
+          if(guild.WelcomeMessage.WelcomeChannel !== WelcomeMessage.WelcomeChannel) {
+            guild.WelcomeMessage.WelcomeChannel = WelcomeMessage.WelcomeChannel;
+          }
+        }
       },
+      guildRoleEmojiUpdated(state, action) {
+        const {_id, RoleReactions } = action.payload;
+        const guild = state.entities[_id];
+        if(guild) {
+          if(guild.RoleReactions.Message_ID !== RoleReactions.Message_ID) {
+            guild.RoleReactions.Message_ID = RoleReactions.Message_ID;
+          }
+
+          if(JSON.stringify(guild.RoleReactions.RoleMappings) !== JSON.stringify(RoleReactions.RoleMappings)) {
+            guild.RoleReactions.RoleMappings = RoleReactions.RoleMappings;
+          }
+        }
+      },
+      // guildListenInfoUpdated(state, action) {
+      // },
     }
 });
 
 const {
     guildAdded,
-    guildsLoaded,
     guildRemoved,
+    guildEatRoleUpdated,
+    guildWelcomeMessageUpdated,
+    guildRoleEmojiUpdated
+    // guildListenInfoUpdated,
 } = guildsSlice.actions
 
 module.exports = {
     guildsSelector,
     guildsSlice,
-    fetchAllGuilds,
     guildAdded,
-    guildsLoaded,
-    guildRemoved
+    guildRemoved,
+    guildEatRoleUpdated,
+    guildWelcomeMessageUpdated,
+    guildRoleEmojiUpdated
+    // guildListenInfoUpdated,
 }
 

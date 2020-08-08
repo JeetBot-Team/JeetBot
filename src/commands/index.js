@@ -8,7 +8,7 @@ const serverInfo = require('./info/serverInfo');
 const userInfo = require('./info/userInfo');
 
 // misc commands
-const embed = require('./embed');
+const embed = require('./misc/embed');
 
 // fun commands
 const dice = require('./fun/dice');
@@ -47,13 +47,13 @@ const commands = {
     eat
 };
 
-module.exports = async (msg, serverInfo, store) => {    
+module.exports = async (msg, store) => {    
     const args = msg.content.split(/ +/); 
 
     if(args.length === 0 || !args[0].startsWith(PREFIX)) return; 
         const command = args.shift().substr(2); 
         
     if (Object.keys(commands).includes(command)) {
-        commands[command](msg, args, serverInfo)
+        commands[command](msg, args, store)
     }
 }
