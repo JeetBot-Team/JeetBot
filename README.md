@@ -20,17 +20,13 @@ Enjoy a variety of commands that can help you customize your Discord server such
 Jeet is a student studying at Hellebore's Academy of Magic! Join him along with his cat Ffej as they slowly work their way to becoming a powerful mage!
 
 ---
-Files that need to be added so it works on your local machine.
+.env needs to be added so it works on your local machine.
 
-* missing .env and needs the following lines
-* "BOT_TOKEN" from Discord
-* "PREFIX" for when initialize commands like 8ball, embed, etc.
+* `BOT_TOKEN` from Discord
+* `PREFIX` for when you want to initialize any of the commands like 8ball, embed, etc.
+* `DB_CONNECTION` for when specific server information
 
 ## Getting Started ✨
-```npm install```
+`npm install --only=prod` - installs all the dependencies to get the bot loaded
 
-installs all the dependencies to get the bot loaded
-
-```npm start``` 
-
-This will allow you to run the bot.
+`npm start` - This will allow you to run the bot.
