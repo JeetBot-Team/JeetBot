@@ -1,6 +1,7 @@
 const Discord = require("discord.js");
 const ServerInfo = require("../../database/models/dbdiscordserverinfo");
 const { guildRoleEmojiUpdated } = require("../../redux/guildsSlice");
+const { serverCache } = require("../../utils/botUtils");
 
 module.exports = async (msg, args, store) => {
   if (msg.member.hasPermission(["MANAGE_ROLES"])) {
@@ -41,10 +42,8 @@ module.exports = async (msg, args, store) => {
         });
 
         guildInfo.RoleReactions.Message_ID = roleEmojiMsgId;
-        let newGuildInfo = JSON.parse(JSON.stringify(guildInfo));
-        newGuildInfo._id = newGuildInfo.server_id;
-        store.dispatch(guildRoleEmojiUpdated(newGuildInfo));
 
+        store.dispatch(guildRoleEmojiUpdated(serverCache(guildInfo)));
         await guildInfo.save();
       }
 
@@ -102,10 +101,7 @@ module.exports = async (msg, args, store) => {
           server_id: msg.channel.guild.id,
         });
 
-        let newGuildInfo = JSON.parse(JSON.stringify(guildInfo));
-        newGuildInfo._id = newGuildInfo.server_id;
-        store.dispatch(guildRoleEmojiUpdated(newGuildInfo));
-
+        store.dispatch(guildRoleEmojiUpdated(serverCache(guildInfo)));
         collector.stop();
       }
     });
