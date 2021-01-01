@@ -42,6 +42,7 @@ const commands = {
     embed,
     dice,
     edit,
+    'welcomeEdit': edit,
     'roleemoji': roleEmoji,
     listen,
     eat,

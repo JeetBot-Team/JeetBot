@@ -1,6 +1,7 @@
 const Discord = require("discord.js");
 const ServerInfo = require("../../database/models/dbdiscordserverinfo");
 const { guildEatRoleUpdated } = require("../../redux/guildsSlice");
+const { serverCache } = require("../../utils/botUtils");
 
 module.exports = async (msg, args, store) => {
   if (msg.member.hasPermission(["MANAGE_ROLES"])) {
@@ -41,11 +42,8 @@ module.exports = async (msg, args, store) => {
             });
 
             guildInfo.EatRole = roleID;
-
             await guildInfo.save();
-            let newGuildInfo = JSON.parse(JSON.stringify(guildInfo));
-            newGuildInfo._id = newGuildInfo.server_id;
-            store.dispatch(guildEatRoleUpdated(newGuildInfo));
+            store.dispatch(guildEatRoleUpdated(serverCache(guildInfo)));
 
             msg.channel.send(
               `${msg.author}, I've told Ffej to bully users with the role you've mentioned.`

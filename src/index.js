@@ -23,6 +23,9 @@ const {
   guildRemoved,
 } = require("./redux/guildsSlice");
 
+// Utils
+const { serverCache } = require("./utils/botUtils");
+
 // When the bot turns on
 // Turn on the connection to DB and retrieve all Discord Servers and their specialized info
 client.once("ready", async () => {
@@ -46,9 +49,7 @@ client.once("ready", async () => {
 
           try {
             await serverInfo.save();
-            let newGuildInfo = JSON.parse(JSON.stringify(serverInfo));
-            newGuildInfo._id = newGuildInfo.server_id;
-            store.dispatch(guildAdded(newGuildInfo));
+            store.dispatch(guildAdded(serverCache(guildInfo)));
             console.log(
               `${guild.name} has been saved to the Database & to the Redux Store`
             );
@@ -56,9 +57,7 @@ client.once("ready", async () => {
             (err) => console.log(err);
           }
         } else {
-          let newGuildInfo = JSON.parse(JSON.stringify(guildInfo));
-          newGuildInfo._id = newGuildInfo.server_id;
-          store.dispatch(guildAdded(newGuildInfo));
+          store.dispatch(guildAdded(serverCache(guildInfo)));
           console.log(
             `${guild.name} exists in the Database & has been added to Redux Store`
           );
@@ -90,10 +89,7 @@ client.on("guildCreate", async (guild) => {
 
     try {
       await serverInfo.save();
-      let newGuildInfo = JSON.parse(JSON.stringify(serverInfo));
-      newGuildInfo._id = newGuildInfo.server_id;
-      store.dispatch(guildAdded(newGuildInfo));
-
+      store.dispatch(guildAdded(serverCache(serverInfo)));
       console.log(
         `${guild.name} has been saved to the Database && Redux Store`
       );
@@ -115,9 +111,7 @@ client.on("guildDelete", async (guild) => {
 
   if (guildInfo) {
     try {
-      let newGuildInfo = JSON.parse(JSON.stringify(serverInfo));
-      newGuildInfo._id = newGuildInfo.server_id;
-      store.dispatch(guildRemoved(newGuildInfo));
+      store.dispatch(guildRemoved(serverCache(guildInfo)));
       await guildInfo.deleteOne();
       console.log(`${guild.name} has been deleted from the Database`);
     } catch {
@@ -155,10 +149,8 @@ client.on("guildMemberAdd", async (member) => {
       server_id: member.guild.id,
     });
 
-    let newGuildInfo = JSON.parse(JSON.stringify(guildInfo));
-    newGuildInfo._id = newGuildInfo.server_id;
-    store.dispatch(guildAdded(newGuildInfo));
-
+    store.dispatch(guildAdded(serverCache(guildInfo)));
+    
     if (guildInfo.WelcomeMessage.WelcomeChannel) {
       let channel = member.guild.channels.cache.find(
         (ch) => ch.id === guildInfo.WelcomeMessage.WelcomeChannel

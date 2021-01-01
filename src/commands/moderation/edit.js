@@ -1,6 +1,7 @@
 const Discord = require("discord.js");
 const ServerInfo = require("../../database/models/dbdiscordserverinfo");
 const { guildWelcomeMessageUpdated } = require("../../redux/guildsSlice");
+const { serverCache } = require("../../utils/botUtils");
 
 module.exports = async (msg, args, store) => {
   if (msg.member.hasPermission(["MANAGE_MESSAGES"])) {
@@ -43,9 +44,7 @@ module.exports = async (msg, args, store) => {
 
         await guildInfo.save();
 
-        let newGuildInfo = JSON.parse(JSON.stringify(guildInfo));
-        newGuildInfo._id = newGuildInfo.server_id;
-        store.dispatch(guildWelcomeMessageUpdated(newGuildInfo));
+        store.dispatch(guildWelcomeMessageUpdated(serverCache(guildInfo)));
       }
 
       if (msg.author.id === m.author.id && m.content.startsWith("<#")) {
@@ -56,12 +55,8 @@ module.exports = async (msg, args, store) => {
         });
 
         guildInfo.WelcomeMessage.WelcomeChannel = channel;
-
         await guildInfo.save();
-
-        let newGuildInfo = JSON.parse(JSON.stringify(guildInfo));
-        newGuildInfo._id = newGuildInfo.server_id;
-        store.dispatch(guildWelcomeMessageUpdated(newGuildInfo));
+        store.dispatch(guildWelcomeMessageUpdated(serverCache(guildInfo)));
 
         console.log("Channel has been collected: ", `${channel}`);
         msg.channel.send(`${msg.author}, Thanks I'll remember that!`);
