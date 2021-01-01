@@ -1,5 +1,5 @@
-const { configureStore, getDefaultMiddleware } = require('@reduxjs/toolkit');
-const { guildsSlice } = require('./guildsSlice');
+const { configureStore, getDefaultMiddleware } = require("@reduxjs/toolkit");
+const { guildsSlice } = require("./guildsSlice");
 
 module.exports = configureStore({
   reducer: {

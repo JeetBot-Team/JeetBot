@@ -1,11 +1,11 @@
-const Discord = require('discord.js');
-const ServerInfo = require('../../database/models/dbdiscordserverinfo');
+const Discord = require("discord.js");
+const ServerInfo = require("../../database/models/dbdiscordserverinfo");
 // const { guildListenInfoUpdated } = require("../../redux/guildsSlice");
 // need to add case when the bot goes down, to re-activate the listen bot on boot up
 
 module.exports = async (msg, args, store) => {
     
-    if(msg.member.hasPermission(['MANAGE_MESSAGES'])) {
+    if(msg.member.hasPermission(["MANAGE_MESSAGES"])) {
         if(msg.author.bot) return;
         console.log(`${msg.author.username} can manage messages from Discord Server: ${msg.guild}`);
 
@@ -25,7 +25,7 @@ module.exports = async (msg, args, store) => {
         	msg.channel.send(`${msg.author}, which channel do you want send listened messages to?\nPlease enter j.channel #channel.`);
         }
 
-        collector.on('collect', async (m, col) => {
+        collector.on("collect", async (m, col) => {
             console.log("\nChannel: " + msg.channel.name + "\nUser: " + m.author.tag + "\nMessage: " + m.content);
 
             if (msg.author.id === m.author.id && m.content.startsWith("j.channel") && !isNaN((m.content.indexOf("#")+1, m.content.length-1))) {
@@ -49,7 +49,7 @@ module.exports = async (msg, args, store) => {
 
             if(destination) {
 
-                if(m.content.toLowerCase() === 'j.done' && (msg.author.id === m.author.id)) {
+                if(m.content.toLowerCase() === "j.done" && (msg.author.id === m.author.id)) {
                     msg.channel.send(`${msg.author}, I'm done listening.`);
                     console.log(`${msg.author} has turned off the message collector in ${msg.guild}`);
                     collector.stop();
@@ -60,7 +60,7 @@ module.exports = async (msg, args, store) => {
                         .setDescription(m.content)
                         .setTimestamp()
                         .setAuthor(m.author.tag, m.author.displayAvatarURL())
-                        .setColor('#68a065')
+                        .setColor("#68a065")
 
                     destination.send(embed);
                 }
@@ -73,7 +73,7 @@ module.exports = async (msg, args, store) => {
             }
         }); 
     } else {
-        console.log('This member cannot access j.listen.');
+        console.log("This member cannot access j.listen.");
         return msg.channel.send(`${msg.author.username} does not have the authority to use j.listen.`);
     }    
 };

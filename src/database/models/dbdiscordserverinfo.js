@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const DiscordServerInfoSchema = new mongoose.Schema({
 	server_id: {
@@ -42,4 +42,4 @@ const DiscordServerInfoSchema = new mongoose.Schema({
 });
 
 
-const DiscordServerInfoModel = module.exports = mongoose.model('DiscordServerInfo', DiscordServerInfoSchema);
+const DiscordServerInfoModel = module.exports = mongoose.model("DiscordServerInfo", DiscordServerInfoSchema);

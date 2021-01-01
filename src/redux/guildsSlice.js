@@ -1,4 +1,4 @@
-const { createSlice, createEntityAdapter } = require('@reduxjs/toolkit');
+const { createSlice, createEntityAdapter } = require("@reduxjs/toolkit");
 
 const guildsAdapter = createEntityAdapter();
 const guildsSelector = guildsAdapter.getSelectors(state => state.guilds)
@@ -8,7 +8,7 @@ const selectId = (instance) => {
 }
 
 const guildsSlice = createSlice({
-    name: 'guilds',
+    name: "guilds",
     initialState: guildsAdapter.getInitialState(),
     reducers: {
       guildAdded(state, action) {

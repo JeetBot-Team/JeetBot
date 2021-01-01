@@ -1,10 +1,10 @@
-const Discord = require('discord.js');
+const Discord = require("discord.js");
 
 module.exports = async (msg) => {
 
     msg.channel.bulkDelete(1, true).catch(err => {
         console.error(err);
-        msg.channel.send('There was an error trying to delete the last message in this channel!');
+        msg.channel.send("There was an error trying to delete the last message in this channel!");
     });
 
     let helpAnnouncement = "Here is a list of Jeet commands you can use.";
@@ -20,7 +20,7 @@ module.exports = async (msg) => {
                         .addField("j.server", "Grabs the server info for you", false)
                         .addField("j.user", "Grabs info about yourself", false)
                         .setTimestamp()
-                        .setColor('#68a065')
+                        .setColor("#68a065")
 
     await msg.channel.send(embed);
 

@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const DB_CONNECTION = process.env.DB_CONNECTION;
 
