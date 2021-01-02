@@ -1,10 +1,10 @@
-const Discord = require("discord.js");
-const ServerInfo = require("../../database/models/dbdiscordserverinfo");
-const { guildRoleEmojiUpdated } = require("../../redux/guildsSlice");
-const { serverCache } = require("../../utils/botUtils");
+const Discord = require(`discord.js`);
+const ServerInfo = require(`../../database/models/dbdiscordserverinfo`);
+const { guildRoleEmojiUpdated } = require(`../../redux/guildsSlice`);
+const { serverCache } = require(`../../utils/botUtils`);
 
 module.exports = async (msg, args, store) => {
-  if (msg.member.hasPermission(["MANAGE_ROLES"])) {
+  if (msg.member.hasPermission([`MANAGE_ROLES`])) {
     console.log(
       `${msg.author.username} can add roles and add emojis from Discord Server: ${msg.guild}`
     );
@@ -15,13 +15,13 @@ module.exports = async (msg, args, store) => {
     let filter = (m) => !m.author.bot;
     let collector = new Discord.MessageCollector(msg.channel, filter);
 
-    collector.on("collect", async (m, col) => {
+    collector.on(`collect`, async (m, col) => {
       console.log(
-        "\nChannel: " +
+        `\nChannel: ` +
           msg.channel.name +
-          "\nUser: " +
+          `\nUser: ` +
           m.author.tag +
-          "\nMessage: " +
+          `\nMessage: ` +
           m.content
       );
 
@@ -29,7 +29,7 @@ module.exports = async (msg, args, store) => {
         let roleEmojiMsgId = m.content.slice(0);
 
         console.log(
-          "roleEmojiMsgId has been collected below",
+          `roleEmojiMsgId has been collected below`,
           `\n ${roleEmojiMsgId}`
         );
 
@@ -47,17 +47,17 @@ module.exports = async (msg, args, store) => {
         await guildInfo.save();
       }
 
-      if (msg.author.id === m.author.id && m.content.startsWith("<:")) {
+      if (msg.author.id === m.author.id && m.content.startsWith(`<:`)) {
         let roleEmojiMapping = m.content.slice(2, m.content.length - 1);
         let emojiID = roleEmojiMapping.slice(
-          roleEmojiMapping.indexOf(":") + 1,
-          roleEmojiMapping.indexOf(">")
+          roleEmojiMapping.indexOf(`:`) + 1,
+          roleEmojiMapping.indexOf(`>`)
         );
-        let roleID = roleEmojiMapping.slice(roleEmojiMapping.indexOf("&") + 1);
+        let roleID = roleEmojiMapping.slice(roleEmojiMapping.indexOf(`&`) + 1);
 
-        console.log("This is the Role Emoji Mapping: ", roleEmojiMapping);
-        console.log("This is the Emoji ID: ", emojiID);
-        console.log("This is the Role ID ", roleID);
+        console.log(`This is the Role Emoji Mapping: `, roleEmojiMapping);
+        console.log(`This is the Emoji ID: `, emojiID);
+        console.log(`This is the Role ID `, roleID);
 
         msg.channel.send(
           `I've collected an emoji and role! Type j.stop if you're done, otherwise keep adding roles.`
@@ -88,14 +88,16 @@ module.exports = async (msg, args, store) => {
 
         try {
           await guildInfo.save();
-          console.log("We've saved the role emoji into the Database");
-        } catch {
-          (err) => console.log(err);
+          console.log(`We've saved the role emoji into the Database`);
+        } catch (err) {
+          console.log(err);
         }
       }
 
-      if (msg.author.id === m.author.id && m.content.startsWith("j.stop")) {
-        msg.channel.send(`${msg.author}, I've stopped collecting role reaction messages.`);
+      if (msg.author.id === m.author.id && m.content.startsWith(`j.stop`)) {
+        msg.channel.send(
+          `${msg.author}, I've stopped collecting role reaction messages.`
+        );
 
         let guildInfo = await ServerInfo.findOne({
           server_id: msg.channel.guild.id,
@@ -106,7 +108,7 @@ module.exports = async (msg, args, store) => {
       }
     });
   } else {
-    console.log("This member cannot add emoji role mappings");
+    console.log(`This member cannot add emoji role mappings`);
     return msg.channel.send(
       `${msg.author.username} does not have the authority to edit the role emoji mappings`
     );

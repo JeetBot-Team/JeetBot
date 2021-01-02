@@ -1,34 +1,34 @@
 // Discord Client
-const Discord = require("discord.js");
-const client = new Discord.Client({ partials: ["MESSAGE", "REACTION"] });
+const Discord = require(`discord.js`);
+const client = new Discord.Client({ partials: [`MESSAGE`, `REACTION`] });
 
 // dotenv
-require("dotenv").config();
+require(`dotenv`).config();
 
 // MongoDB Info
-const database = require("./database/database");
-const ServerInfo = require("./database/models/dbdiscordserverinfo");
+const database = require(`./database/database`);
+const ServerInfo = require(`./database/models/dbdiscordserverinfo`);
 
 // Handlers
-const commandHandler = require("./commands");
+const commandHandler = require(`./commands`);
 
 // cooldowns to fix later
 const cooldowns = new Discord.Collection();
 
 // redux store
-const store = require("./redux/store");
+const store = require(`./redux/store`);
 const {
   guildsSelector,
   guildAdded,
   guildRemoved,
-} = require("./redux/guildsSlice");
+} = require(`./redux/guildsSlice`);
 
 // Utils
-const { serverCache } = require("./utils/botUtils");
+const { serverCache } = require(`./utils/botUtils`);
 
 // When the bot turns on
 // Turn on the connection to DB and retrieve all Discord Servers and their specialized info
-client.once("ready", async () => {
+client.once(`ready`, async () => {
   database
     .then(() => console.log(`${client.user.tag} is connected to MongoDB.`))
     .catch((err) => console.log(err));
@@ -53,8 +53,8 @@ client.once("ready", async () => {
             console.log(
               `${guild.name} has been saved to the Database & to the Redux Store`
             );
-          } catch {
-            (err) => console.log(err);
+          } catch (err) {
+            console.log(err);
           }
         } else {
           store.dispatch(guildAdded(serverCache(guildInfo)));
@@ -64,16 +64,16 @@ client.once("ready", async () => {
         }
       })
     );
-  } catch {
-    (err) => console.log(err);
+  } catch (err) {
+    console.log(err);
   } finally {
-    console.log("*** This is the Store's status ***\n", store.getState());
+    console.log(`*** This is the Store's status ***\n`, store.getState());
     console.log(`${client.user.tag} is Ready To Rock And Roll!`);
   }
 });
 
 // When Jeet joins a new server
-client.on("guildCreate", async (guild) => {
+client.on(`guildCreate`, async (guild) => {
   console.log(`Jeet has joined a new Discord server: ${guild.name}`);
 
   let guildInfo = await ServerInfo.findOne({
@@ -93,8 +93,8 @@ client.on("guildCreate", async (guild) => {
       console.log(
         `${guild.name} has been saved to the Database && Redux Store`
       );
-    } catch {
-      (err) => console.log(err);
+    } catch (err) {
+      console.log(err);
     }
   } else {
     console.log(`${guild.name} exists in the Database`);
@@ -102,7 +102,7 @@ client.on("guildCreate", async (guild) => {
 });
 
 // Jeet has been kicked off the server
-client.on("guildDelete", async (guild) => {
+client.on(`guildDelete`, async (guild) => {
   console.log(`Jeet has been kicked from ${guild.name}`);
 
   let guildInfo = await ServerInfo.findOne({
@@ -114,8 +114,8 @@ client.on("guildDelete", async (guild) => {
       store.dispatch(guildRemoved(serverCache(guildInfo)));
       await guildInfo.deleteOne();
       console.log(`${guild.name} has been deleted from the Database`);
-    } catch {
-      (err) => console.log(err);
+    } catch (err) {
+      console.log(err);
     }
   } else {
     console.log(`${guild.name} does not exist in the Database`);
@@ -123,7 +123,7 @@ client.on("guildDelete", async (guild) => {
 });
 
 // An event listener for new guild members
-client.on("guildMemberAdd", async (member) => {
+client.on(`guildMemberAdd`, async (member) => {
   let clientGuildInfo = guildsSelector.selectById(
     store.getState(),
     member.guild.id
@@ -150,7 +150,7 @@ client.on("guildMemberAdd", async (member) => {
     });
 
     store.dispatch(guildAdded(serverCache(guildInfo)));
-    
+
     if (guildInfo.WelcomeMessage.WelcomeChannel) {
       let channel = member.guild.channels.cache.find(
         (ch) => ch.id === guildInfo.WelcomeMessage.WelcomeChannel
@@ -165,7 +165,7 @@ client.on("guildMemberAdd", async (member) => {
 });
 
 // Adds a Role to user when user uses reaction on role-select
-client.on("messageReactionAdd", async (reaction, user) => {
+client.on(`messageReactionAdd`, async (reaction, user) => {
   let applyRole = async (roleMappings) => {
     let role = undefined;
 
@@ -185,9 +185,9 @@ client.on("messageReactionAdd", async (reaction, user) => {
 
     try {
       if (role && member) {
-        console.log("Role & Member Found!");
+        console.log(`Role & Member Found!`);
         await member.roles.add(role);
-        console.log("Role added to Member!");
+        console.log(`Role added to Member!`);
       }
     } catch (err) {
       console.log(err);
@@ -197,7 +197,7 @@ client.on("messageReactionAdd", async (reaction, user) => {
   if (reaction.message.partial) {
     let reactionMessage = await reaction.message.fetch().catch((error) => {
       console.log(
-        "Something went wrong when fetching a partial message: ",
+        `Something went wrong when fetching a partial message: `,
         error
       );
     });
@@ -211,7 +211,7 @@ client.on("messageReactionAdd", async (reaction, user) => {
 
     if (reactionMessage.id === roleSelectMessageId) {
       console.log(
-        "Someone reacted to a message\nFetched the Partial Message & reactionID = roleSelectID"
+        `Someone reacted to a message\nFetched the Partial Message & reactionID = roleSelectID`
       );
       applyRole(guildInfo.RoleReactions.RoleMappings);
     }
@@ -224,7 +224,7 @@ client.on("messageReactionAdd", async (reaction, user) => {
 
     if (reaction.message.id === roleSelectMessageId) {
       console.log(
-        "Someone reacted to a message\nThe message was not partial\nReaction Message = Role Message Id"
+        `Someone reacted to a message\nThe message was not partial\nReaction Message = Role Message Id`
       );
       applyRole(guildInfo.RoleReactions.RoleMappings);
     }
@@ -232,28 +232,28 @@ client.on("messageReactionAdd", async (reaction, user) => {
 });
 
 // Special Messages and EatRole Handler
-client.on("message", async (message) => {
+client.on(`message`, async (message) => {
   if (message.author.bot) return;
 
   const specialMessage = message.content.toLowerCase();
 
-  if (specialMessage === "good morning jeet!") {
+  if (specialMessage === `good morning jeet!`) {
     message.channel.send(`Good Morning ${message.author.username}`);
   }
 
-  if (specialMessage === "jeet i love you!") {
+  if (specialMessage === `jeet i love you!`) {
     message.channel.send(`I love you too, ${message.author.username}`);
   }
 
   if (
-    specialMessage === "j.test" &&
-    message.author.id === "427702166640263169"
+    specialMessage === `j.test` &&
+    message.author.id === `427702166640263169`
   ) {
     let test = guildsSelector.selectById(
       store.getState(),
       message.channel.guild.id
     );
-    console.log("*** This is the Guild Info You Requested ***\n", test);
+    console.log(`*** This is the Guild Info You Requested ***\n`, test);
   }
 
   let guildInfo = guildsSelector.selectById(
@@ -290,12 +290,12 @@ client.on("message", async (message) => {
 });
 
 // Command Handler
-client.on("message", async (msg) => {
+client.on(`message`, async (msg) => {
   commandHandler(msg, store);
 });
 
-process.on("unhandledRejection", (error) => {
-  console.error("Unhandled promise rejection:", error);
+process.on(`unhandledRejection`, (error) => {
+  console.error(`Unhandled promise rejection:`, error);
 });
 
 client.login(process.env.BOT_TOKEN);

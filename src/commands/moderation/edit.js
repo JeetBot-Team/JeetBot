@@ -1,10 +1,10 @@
-const Discord = require("discord.js");
-const ServerInfo = require("../../database/models/dbdiscordserverinfo");
-const { guildWelcomeMessageUpdated } = require("../../redux/guildsSlice");
-const { serverCache } = require("../../utils/botUtils");
+const Discord = require(`discord.js`);
+const ServerInfo = require(`../../database/models/dbdiscordserverinfo`);
+const { guildWelcomeMessageUpdated } = require(`../../redux/guildsSlice`);
+const { serverCache } = require(`../../utils/botUtils`);
 
 module.exports = async (msg, args, store) => {
-  if (msg.member.hasPermission(["MANAGE_MESSAGES"])) {
+  if (msg.member.hasPermission([`MANAGE_MESSAGES`])) {
     console.log(
       `${msg.author.username} can manage messages from Discord Server: ${msg.guild}`
     );
@@ -15,20 +15,20 @@ module.exports = async (msg, args, store) => {
     let filter = (m) => !m.author.bot;
     let collector = new Discord.MessageCollector(msg.channel, filter);
 
-    collector.on("collect", async (m, col) => {
+    collector.on(`collect`, async (m, col) => {
       console.log(
-        "\nChannel: " +
+        `\nChannel: ` +
           msg.channel.name +
-          "\nUser: " +
+          `\nUser: ` +
           m.author.tag +
-          "\nMessage: " +
+          `\nMessage: ` +
           m.content
       );
 
-      if (msg.author.id === m.author.id && m.content.includes("j.end")) {
+      if (msg.author.id === m.author.id && m.content.includes(`j.end`)) {
         let welcomeMsg = m.content.slice(0, m.content.length - 5);
         console.log(
-          "\n** Welcome Message has been collected below**",
+          `\n** Welcome Message has been collected below**`,
           `\n ${welcomeMsg}`
         );
 
@@ -47,7 +47,7 @@ module.exports = async (msg, args, store) => {
         store.dispatch(guildWelcomeMessageUpdated(serverCache(guildInfo)));
       }
 
-      if (msg.author.id === m.author.id && m.content.startsWith("<#")) {
+      if (msg.author.id === m.author.id && m.content.startsWith(`<#`)) {
         let channel = m.content.slice(2, m.content.length - 1);
 
         let guildInfo = await ServerInfo.findOne({
@@ -58,13 +58,13 @@ module.exports = async (msg, args, store) => {
         await guildInfo.save();
         store.dispatch(guildWelcomeMessageUpdated(serverCache(guildInfo)));
 
-        console.log("Channel has been collected: ", `${channel}`);
+        console.log(`Channel has been collected: `, `${channel}`);
         msg.channel.send(`${msg.author}, Thanks I'll remember that!`);
         collector.stop();
       }
     });
   } else {
-    console.log("This member cannot edit the welcome message");
+    console.log(`This member cannot edit the welcome message`);
     msg.channel.send(
       `${msg.author.username} does not have the authority to edit the welcome message`
     );
