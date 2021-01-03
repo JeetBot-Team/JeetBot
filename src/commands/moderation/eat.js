@@ -1,10 +1,10 @@
-const Discord = require("discord.js");
-const ServerInfo = require("../../database/models/dbdiscordserverinfo");
-const { guildEatRoleUpdated } = require("../../redux/guildsSlice");
-const { serverCache } = require("../../utils/botUtils");
+const Discord = require(`discord.js`);
+const ServerInfo = require(`../../database/models/dbdiscordserverinfo`);
+const { guildEatRoleUpdated } = require(`../../redux/guildsSlice`);
+const { serverCache } = require(`../../utils/botUtils`);
 
 module.exports = async (msg, args, store) => {
-  if (msg.member.hasPermission(["MANAGE_ROLES"])) {
+  if (msg.member.hasPermission([`MANAGE_ROLES`])) {
     console.log(
       `${msg.author.username} can manage roles from Discord Server: ${msg.guild}`
     );
@@ -15,26 +15,26 @@ module.exports = async (msg, args, store) => {
     let filter = (m) => !m.author.bot;
     let collector = new Discord.MessageCollector(msg.channel, filter);
 
-    collector.on("collect", async (m, col) => {
+    collector.on(`collect`, async (m, col) => {
       console.log(
-        "\nChannel: " +
+        `\nChannel: ` +
           msg.channel.name +
-          "\nUser: " +
+          `\nUser: ` +
           m.author.tag +
-          "\nMessage: " +
+          `\nMessage: ` +
           m.content
       );
 
-      if (msg.author.id === m.author.id && m.content.includes("j.this")) {
+      if (msg.author.id === m.author.id && m.content.includes(`j.this`)) {
         let roleID = m.content.slice(
-          m.content.indexOf("&") + 1,
-          m.content.indexOf(">")
+          m.content.indexOf(`&`) + 1,
+          m.content.indexOf(`>`)
         );
 
         role = msg.guild.roles.cache.find((role) => role.id === role.id);
 
         if (role) {
-          console.log("The role Ffej will eat is ", `${roleID}`);
+          console.log(`The role Ffej will eat is `, `${roleID}`);
 
           try {
             let guildInfo = await ServerInfo.findOne({
@@ -50,8 +50,8 @@ module.exports = async (msg, args, store) => {
             );
 
             collector.stop();
-          } catch {
-            (err) => console.log(err);
+          } catch (err) {
+            console.log(err);
           }
         } else {
           msg.channel.send(
@@ -60,7 +60,7 @@ module.exports = async (msg, args, store) => {
         }
       }
 
-      if (msg.author.id === m.author.id && m.content.includes("j.stop")) {
+      if (msg.author.id === m.author.id && m.content.includes(`j.stop`)) {
         msg.channel.send(
           `${msg.author}, I've told Ffej not to change anything.`
         );
@@ -68,7 +68,7 @@ module.exports = async (msg, args, store) => {
       }
     });
   } else {
-    console.log("This member cannot tell Ffej which role to eat");
+    console.log(`This member cannot tell Ffej which role to eat`);
     msg.channel.send(
       `${msg.author.username} does not have the authority to tell Ffej what to do.`
     );
