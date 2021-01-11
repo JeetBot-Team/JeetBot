@@ -1,6 +1,9 @@
 const Discord = require(`discord.js`);
 const ServerInfo = require(`../../database/models/dbdiscordserverinfo`);
 const { serverCache } = require(`../../utils/botUtils`);
+const { guildServerClockUpdated } = require(`../../redux/guildsSlice`);
+
+// Setting timezone
 const dayjs = require(`dayjs`);
 const utc = require(`dayjs/plugin/utc`); // dependent on utc plugin
 const timezone = require(`dayjs/plugin/timezone`);
@@ -17,8 +20,9 @@ module.exports = async (msg, args, store) => {
     );
 
     msg.channel.send(
-      `${msg.author}, Please set the timezone you would like the clock to be in`
+      `${msg.author}, Please enter the timezone you wish your clock to be set in?\n Please enter the time zone in caps like "EST" or the country like "Japan" or "America/New_York"\nType in "j.entry" at the end when you're finished.\nIf you want to exit without making changes, type j.exit`
     );
+
     let filter = (m) => !m.author.bot;
     let collector = new Discord.MessageCollector(msg.channel, filter);
 
@@ -39,92 +43,45 @@ module.exports = async (msg, args, store) => {
       console.log({ japanTime: japanNow });
       console.log({ estTime: estNow });
 
-      if (msg.author.id === m.author.id && !isNaN(m.content)) {
-        let serverClockChannelId = m.content.slice(0);
+      if (
+        msg.author.id === m.author.id &&
+        !isNaN(m.content) &&
+        m.content.includes(`j.entry`)
+      ) {
+        let timeZoneSetting = m.content.slice(0, m.content.indexOf(`j.entry`));
+
+        // test if they entered a proper time zone
+        // if not exit out
+
+        // if they have a server clock already made,
+        // allow them to change the timezone for that otherwise create a new voice channel for it
 
         console.log(
-          `serverClockChannelId has been collected below`,
-          `\n ${serverClockChannelId}`
-        );
-
-        msg.channel.send(
-          `${msg.author}, Please enter the timezone you wish your clock to be set in?\n Please enter the time zone in caps like "EST"\nType in j.stop when you're finished.`
+          `timeZoneSetting has been collected below`,
+          `\n ${timeZoneSetting}`
         );
 
         let guildInfo = await ServerInfo.findOne({
           server_id: msg.channel.guild.id,
         });
 
-        guildInfo.server_clock.channel_ID = serverClockChannelId;
+        guildInfo.server_clock.timezone = timeZoneSetting;
 
-        store.dispatch(guildRoleEmojiUpdated(serverCache(guildInfo)));
+        store.dispatch(guildServerClockUpdated(serverCache(guildInfo)));
         await guildInfo.save();
       }
 
-      if (msg.author.id === m.author.id && m.content.startsWith(`<:`)) {
-        let roleEmojiMapping = m.content.slice(2, m.content.length - 1);
-        let emojiID = roleEmojiMapping.slice(
-          roleEmojiMapping.indexOf(`:`) + 1,
-          roleEmojiMapping.indexOf(`>`)
-        );
-        let roleID = roleEmojiMapping.slice(roleEmojiMapping.indexOf(`&`) + 1);
-
-        console.log(`This is the Role Emoji Mapping: `, roleEmojiMapping);
-        console.log(`This is the Emoji ID: `, emojiID);
-        console.log(`This is the Role ID `, roleID);
-
+      if (msg.author.id === m.author.id && m.content.startsWith(`j.exit`)) {
         msg.channel.send(
-          `I've collected an emoji and role! Type j.stop if you're done, otherwise keep adding roles.`
+          `${msg.author}, I made no changes as you've requested`
         );
-
-        let guildInfo = await ServerInfo.findOne({
-          server_id: msg.channel.guild.id,
-        });
-
-        let roleEmojiObj = {
-          [emojiID]: roleID,
-        };
-
-        if (guildInfo.RoleReactions.RoleMappings) {
-          for (let key in guildInfo.RoleReactions.RoleMappings) {
-            if (guildInfo.RoleReactions.RoleMappings[key] === roleID) {
-              msg.channel.send(
-                `${msg.author}, that role emoji mapping exists! Please enter a new one.`
-              );
-              return;
-            }
-          }
-
-          guildInfo.RoleReactions.RoleMappings.push(roleEmojiObj);
-        } else if (!guildInfo.RoleReactions.RoleMappings) {
-          guildInfo.RoleReactions.RoleMappings = roleEmojiObj;
-        }
-
-        try {
-          await guildInfo.save();
-          console.log(`We've saved the role emoji into the Database`);
-        } catch (err) {
-          console.log(err);
-        }
-      }
-
-      if (msg.author.id === m.author.id && m.content.startsWith(`j.stop`)) {
-        msg.channel.send(
-          `${msg.author}, I've stopped collecting role reaction messages.`
-        );
-
-        let guildInfo = await ServerInfo.findOne({
-          server_id: msg.channel.guild.id,
-        });
-
-        store.dispatch(guildRoleEmojiUpdated(serverCache(guildInfo)));
         collector.stop();
       }
     });
   } else {
-    console.log(`This member cannot add emoji role mappings`);
+    console.log(`This member cannot create a server clock`);
     return msg.channel.send(
-      `${msg.author.username} does not have the authority to edit the role emoji mappings`
+      `${msg.author.username} does not have the authority to create a server clock`
     );
   }
 };

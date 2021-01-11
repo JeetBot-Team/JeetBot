@@ -59,6 +59,16 @@ const guildsSlice = createSlice({
         }
       }
     },
+    guildServerClockUpdated(state, action) {
+      const { _id, server_clock } = action.payload;
+      const guild = state.entities[_id];
+
+      if (guild) {
+        if (guild.server_clock !== server_clock) {
+          guild.server_clock = server_clock;
+        }
+      }
+    },
     // guildListenInfoUpdated(state, action) {
     // },
   },
@@ -70,6 +80,7 @@ const {
   guildEatRoleUpdated,
   guildWelcomeMessageUpdated,
   guildRoleEmojiUpdated,
+  guildServerClockUpdated,
   // guildListenInfoUpdated,
 } = guildsSlice.actions;
 
@@ -81,5 +92,6 @@ module.exports = {
   guildEatRoleUpdated,
   guildWelcomeMessageUpdated,
   guildRoleEmojiUpdated,
+  guildServerClockUpdated,
   // guildListenInfoUpdated,
 };
