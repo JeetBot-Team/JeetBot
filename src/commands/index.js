@@ -24,6 +24,7 @@ const listen = require(`./moderation/listen`);
 const mute = require(`./moderation/mute`);
 const prune = require(`./moderation/prune`);
 const roleEmoji = require(`./moderation/roleEmoji`);
+const serverClock = require(`./moderation/serverClock`);
 
 // Prefix
 const PREFIX = process.env.PREFIX;
@@ -47,6 +48,7 @@ const commands = {
   listen,
   eat,
   patpat,
+  clock: serverClock,
 };
 
 module.exports = async (msg, store) => {

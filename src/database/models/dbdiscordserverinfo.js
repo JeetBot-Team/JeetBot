@@ -39,6 +39,17 @@ const DiscordServerInfoSchema = new mongoose.Schema({
   EatRole: {
     type: String,
   },
+  server_clock: {
+    channel_ID: {
+      type: String,
+    },
+    timezone: {
+      type: String,
+    },
+    last_recorded_time: {
+      type: String,
+    },
+  },
 });
 
 const DiscordServerInfoModel = (module.exports = mongoose.model(

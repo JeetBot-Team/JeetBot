@@ -59,6 +59,15 @@ const guildsSlice = createSlice({
         }
       }
     },
+    guildServerClockUpdated(state, action) {
+      const id = selectId(action.payload);
+      action.payload.id = id;
+      const guild = state.entities[id];
+
+      if (guild) {
+        guildsAdapter.upsertOne(state, action.payload);
+      }
+    },
     // guildListenInfoUpdated(state, action) {
     // },
   },
@@ -70,6 +79,7 @@ const {
   guildEatRoleUpdated,
   guildWelcomeMessageUpdated,
   guildRoleEmojiUpdated,
+  guildServerClockUpdated,
   // guildListenInfoUpdated,
 } = guildsSlice.actions;
 
@@ -81,5 +91,6 @@ module.exports = {
   guildEatRoleUpdated,
   guildWelcomeMessageUpdated,
   guildRoleEmojiUpdated,
+  guildServerClockUpdated,
   // guildListenInfoUpdated,
 };

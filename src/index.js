@@ -21,10 +21,18 @@ const {
   guildsSelector,
   guildAdded,
   guildRemoved,
+  guildServerClockUpdated,
 } = require(`./redux/guildsSlice`);
 
 // Utils
 const { serverCache } = require(`./utils/botUtils`);
+
+// Date/Time
+const dayjs = require(`dayjs`);
+const utc = require(`dayjs/plugin/utc`); // dependent on utc plugin
+const timezone = require(`dayjs/plugin/timezone`);
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 // When the bot turns on
 // Turn on the connection to DB and retrieve all Discord Servers and their specialized info
@@ -275,7 +283,7 @@ client.on(`message`, async (message) => {
       );
       let chance = Math.floor(Math.random() * 100) + 1;
 
-      if (chance > 0 && chance <= 15) {
+      if (chance > 0 && chance <= 50) {
         message
           .delete()
           .then((msg) =>
@@ -285,6 +293,40 @@ client.on(`message`, async (message) => {
           )
           .catch((err) => console.log(err));
       }
+    }
+  }
+
+  // clock settings
+  if (guildInfo.server_clock) {
+    // make date object, compare that to the last recorded time
+    const clock = dayjs().tz(guildInfo.server_clock.timezone).format(`hh:mm A`);
+    let currentTime = `Server Time: ${clock}`;
+
+    // if time is different, change time
+    if (currentTime != guildInfo.server_clock.last_recorded_time) {
+      // change the time
+      console.log({ currentTime });
+      console.log({
+        "before change clock": guildInfo.server_clock.last_recorded_time,
+      });
+
+      let guildInfoToUpdate = await ServerInfo.findOne({
+        server_id: message.channel.guild.id,
+      });
+      guildInfoToUpdate.server_clock.last_recorded_time = currentTime;
+      console.log({
+        "after change clock": guildInfoToUpdate.server_clock.last_recorded_time,
+      });
+      // save it to the store
+      store.dispatch(guildServerClockUpdated(serverCache(guildInfoToUpdate)));
+      // find channel
+      let channel = await message.guild.channels.cache.get(
+        guildInfo.server_clock.channel_ID
+      );
+      // change time on clock
+      await channel.edit({ name: currentTime });
+    } else {
+      console.log(`Time doesn't need to be changed`);
     }
   }
 });
