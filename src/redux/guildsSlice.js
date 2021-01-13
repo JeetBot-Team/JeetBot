@@ -60,13 +60,12 @@ const guildsSlice = createSlice({
       }
     },
     guildServerClockUpdated(state, action) {
-      const { _id, server_clock } = action.payload;
-      const guild = state.entities[_id];
+      const id = selectId(action.payload);
+      action.payload.id = id;
+      const guild = state.entities[id];
 
       if (guild) {
-        if (guild.server_clock !== server_clock) {
-          guild.server_clock = server_clock;
-        }
+        guildsAdapter.upsertOne(state, action.payload);
       }
     },
     // guildListenInfoUpdated(state, action) {

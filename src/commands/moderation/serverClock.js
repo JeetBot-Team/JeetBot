@@ -1,7 +1,10 @@
 const Discord = require(`discord.js`);
 const ServerInfo = require(`../../database/models/dbdiscordserverinfo`);
 const { serverCache } = require(`../../utils/botUtils`);
-const { guildServerClockUpdated } = require(`../../redux/guildsSlice`);
+const {
+  guildServerClockUpdated,
+  guildsSelector,
+} = require(`../../redux/guildsSlice`);
 
 // Setting timezone
 const dayjs = require(`dayjs`);
@@ -11,16 +14,26 @@ dayjs.extend(utc);
 dayjs.extend(timezone);
 
 module.exports = async (msg, args, store) => {
-  // ask user to make a voice channel
-  // then ask for the time zone, make this in UTC or something? i don't know
-  // in index.js do a check every minute
   if (msg.member.hasPermission([`BAN_MEMBERS`])) {
     console.log(
       `${msg.author.username} can ban members from Discord Server: ${msg.guild}`
     );
 
+    let clientGuildInfo = guildsSelector.selectById(
+      store.getState(),
+      msg.guild.id
+    );
+    let newChannelInfo = undefined;
+
+    if (clientGuildInfo.server_clock) {
+      newChannelInfo = clientGuildInfo.server_clock;
+      console.log(`${msg.guild} has an existing server clock`);
+    }
+    // if they have a server clock already made,
+    // allow them to change the timezone for that otherwise create a new voice channel for it
+
     msg.channel.send(
-      `${msg.author}, Please enter the timezone you wish your clock to be set in?\n Please enter the time zone in caps like "EST" or the country like "Japan" or "America/New_York"\nType in "j.entry" at the end when you're finished.\nIf you want to exit without making changes, type j.exit`
+      `${msg.author}, Please enter the timezone you wish your clock to be set in?\nPlease enter the time zone with the continent/major city such as "America/New_York"\nType in "j.entry" at the beginning then the time zone.\nIf you want to exit without making changes, type j.exit`
     );
 
     let filter = (m) => !m.author.bot;
@@ -36,39 +49,61 @@ module.exports = async (msg, args, store) => {
           m.content
       );
 
-      // const now = dayjs()
-      const japanNow = dayjs().tz(`Japan`);
-      const estNow = dayjs().tz(`America/New_York`);
-      // console.log(now)
-      console.log({ japanTime: japanNow });
-      console.log({ estTime: estNow });
+      if (msg.author.id === m.author.id && m.content.startsWith(`j.entry`)) {
+        // use regex later
+        let timeZoneSetting = m.content.slice(8);
+        let testClock;
 
-      if (
-        msg.author.id === m.author.id &&
-        !isNaN(m.content) &&
-        m.content.includes(`j.entry`)
-      ) {
-        let timeZoneSetting = m.content.slice(0, m.content.indexOf(`j.entry`));
-
-        // test if they entered a proper time zone
-        // if not exit out
-
-        // if they have a server clock already made,
-        // allow them to change the timezone for that otherwise create a new voice channel for it
+        try {
+          testClock = dayjs().tz(timeZoneSetting);
+        } catch (err) {
+          return m.channel.send(
+            `${m.author}, that is not a correct format for time zones.\nPlease enter the time zone with the continent/major city such as "America/New_York" without quotes`
+          );
+        }
 
         console.log(
-          `timeZoneSetting has been collected below`,
-          `\n ${timeZoneSetting}`
+          `timeZoneSetting has been collected: `,
+          `${timeZoneSetting}`
         );
+
+        // parse the clock time
+        const clock = dayjs().tz(timeZoneSetting).format(`hh:mm A`);
+
+        if (!newChannelInfo) {
+          newChannelInfo = await m.guild.channels.create(
+            `Server Time: ${clock}`,
+            {
+              type: `voice`,
+              userLimit: 0,
+            }
+          );
+          console.log({ id: newChannelInfo.id });
+        } else if (newChannelInfo.channel_ID) {
+          // change the existing server clock
+          // find the channel using channel_ID
+          let channel = m.guild.channels.cache.get(newChannelInfo.channel_ID);
+          await channel.edit({ name: `Server Time: ${clock}` });
+          console.log(`clock in ${msg.guild} changed timezones`);
+        }
 
         let guildInfo = await ServerInfo.findOne({
           server_id: msg.channel.guild.id,
         });
 
         guildInfo.server_clock.timezone = timeZoneSetting;
+        guildInfo.server_clock.channel_ID =
+          newChannelInfo.id || newChannelInfo.channel_ID;
+        guildInfo.server_clock.last_recorded_time = `Server Time: ${clock}`;
 
         store.dispatch(guildServerClockUpdated(serverCache(guildInfo)));
         await guildInfo.save();
+
+        msg.channel.send(
+          `${msg.author}, thanks! I made the changes you've requested. The clock is set at the top of the server channels`
+        );
+        console.log(`Task done, collector stopped`);
+        collector.stop();
       }
 
       if (msg.author.id === m.author.id && m.content.startsWith(`j.exit`)) {

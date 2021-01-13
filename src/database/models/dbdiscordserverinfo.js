@@ -46,6 +46,9 @@ const DiscordServerInfoSchema = new mongoose.Schema({
     timezone: {
       type: String,
     },
+    last_recorded_time: {
+      type: String,
+    },
   },
 });
 
