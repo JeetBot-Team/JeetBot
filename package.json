@@ -10,7 +10,8 @@
   "scripts": {
     "lint": "eslint ./src/",
     "lintfix": "eslint --fix ./src/",
-    "start": "node src/index.js"
+    "start": "node src/index.js",
+    "test": "jest"
   },
   "author": "Julia Kyung & Tam Nguyen",
   "license": "MIT",
