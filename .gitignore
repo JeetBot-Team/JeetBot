@@ -1,6 +1,16 @@
+# modules
 node_modules
+
+# env
 .env
+
+# passwords
 jeetbot.pem
+
+# todos
 pending
 marketing
+todo.txt
+
+# error reports
 .eslintcache
