@@ -22,15 +22,18 @@ const guildsSlice = createSlice({
       guildsAdapter.removeOne(state, action.payload);
     },
     guildEatRoleUpdated(state, action) {
-      const { _id, EatRole } = action.payload;
-      const guild = state.entities[_id];
+      const id = selectId(action.payload);
+      action.payload.id = id;
+      const guild = state.entities[id];
       if (guild) {
-        guild.EatRole = EatRole;
+        guildsAdapter.upsertOne(state, action.payload);
       }
     },
     guildWelcomeMessageUpdated(state, action) {
-      const { _id, WelcomeMessage } = action.payload;
-      const guild = state.entities[_id];
+      const id = selectId(action.payload);
+      action.payload.id = id;
+      const guild = state.entities[id];
+
       if (guild) {
         if (guild.WelcomeMessage.MessageInfo !== WelcomeMessage.MessageInfo) {
           guild.WelcomeMessage.MessageInfo = WelcomeMessage.MessageInfo;

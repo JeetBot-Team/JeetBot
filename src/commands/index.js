@@ -18,7 +18,7 @@ const patpat = require(`./fun/patpat`);
 // moderation commands
 const ban = require(`./moderation/ban`);
 const eat = require(`./moderation/eat`);
-const edit = require(`./moderation/edit`);
+const welcomeEdit = require(`./moderation/welcomeEdit`);
 const kick = require(`./moderation/kick`);
 const listen = require(`./moderation/listen`);
 const mute = require(`./moderation/mute`);
@@ -42,8 +42,7 @@ const commands = {
   help,
   embed,
   dice,
-  edit,
-  welcomeEdit: edit,
+  welcomeEdit,
   roleemoji: roleEmoji,
   listen,
   eat,
