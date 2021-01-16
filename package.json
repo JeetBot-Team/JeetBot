@@ -16,21 +16,22 @@
   "author": "Julia Kyung & Tam Nguyen",
   "license": "MIT",
   "dependencies": {
-    "@reduxjs/toolkit": "^1.4.0",
-    "dayjs": "^1.10.1",
-    "discord.js": "^12.2.0",
+    "@reduxjs/toolkit": "^1.5.0",
+    "dayjs": "^1.10.3",
+    "discord.js": "^12.5.1",
     "dotenv": "^8.2.0",
-    "mongoose": "^5.9.21"
+    "mongoose": "^5.11.12"
   },
   "devDependencies": {
     "eslint": "^6.8.0",
     "eslint-config-prettier": "^7.1.0",
-    "husky": "^4.3.6",
-    "jest": "^26.2.2",
+    "husky": "^4.3.7",
+    "jest": "^26.6.3",
+    "jest-extended": "^0.11.5",
     "lint-staged": "^10.5.3",
     "mquery": "^3.2.3",
     "node-notifier": "^9.0.0",
-    "prettier": "^2.0.5"
+    "prettier": "^2.2.1"
   },
   "husky": {
     "hooks": {

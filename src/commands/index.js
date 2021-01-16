@@ -27,7 +27,7 @@ const roleEmoji = require(`./moderation/roleEmoji`);
 const serverClock = require(`./moderation/serverClock`);
 
 // Prefix
-const PREFIX = process.env.PREFIX;
+const PREFIX = process.env.PREFIX || `j.`;
 
 const commands = {
   ping,
