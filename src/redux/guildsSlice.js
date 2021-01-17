@@ -25,6 +25,7 @@ const guildsSlice = createSlice({
       const id = selectId(action.payload);
       action.payload.id = id;
       const guild = state.entities[id];
+
       if (guild) {
         guildsAdapter.upsertOne(state, action.payload);
       }
@@ -35,15 +36,7 @@ const guildsSlice = createSlice({
       const guild = state.entities[id];
 
       if (guild) {
-        if (guild.WelcomeMessage.MessageInfo !== WelcomeMessage.MessageInfo) {
-          guild.WelcomeMessage.MessageInfo = WelcomeMessage.MessageInfo;
-        }
-
-        if (
-          guild.WelcomeMessage.WelcomeChannel !== WelcomeMessage.WelcomeChannel
-        ) {
-          guild.WelcomeMessage.WelcomeChannel = WelcomeMessage.WelcomeChannel;
-        }
+        guildsAdapter.upsertOne(state, action.payload);
       }
     },
     guildRoleEmojiUpdated(state, action) {

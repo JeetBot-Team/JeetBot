@@ -1,6 +1,9 @@
 const Discord = require(`discord.js`);
 const ServerInfo = require(`../../database/models/dbdiscordserverinfo`);
-const { guildWelcomeMessageUpdated } = require(`../../redux/guildsSlice`);
+const {
+  guildWelcomeMessageUpdated,
+  guildsSelector,
+} = require(`../../redux/guildsSlice`);
 const { serverCache } = require(`../../utils/botUtils`);
 
 module.exports = async (msg, args, store) => {
@@ -9,9 +12,24 @@ module.exports = async (msg, args, store) => {
       `${msg.author.username} can manage messages from Discord Server: ${msg.guild}`
     );
 
-    msg.channel.send(
-      `${msg.author}, what would you like your welcome message to be?\n(Don't forget to end your welcome message with j.end)`
+    let clientGuildInfo = guildsSelector.selectById(
+      store.getState(),
+      msg.guild.id
     );
+
+    let guildWelcomeMessage = undefined;
+
+    if (clientGuildInfo.WelcomeMessage) {
+      guildWelcomeMessage = clientGuildInfo.WelcomeMessage;
+      msg.channel.send(
+        `${msg.author}, you have an existing welcome message for the Discord Server.\nWould you like to edit the following settings:\nj.editMessage - Welcome Message Edit\nj.editChannel - Welcome Channel Edit\nj.editBoth - Edits the Welcome Message & Channel`
+      );
+    } else {
+      msg.channel.send(
+        `${msg.author}, what would you like your welcome message to be?\n(Don't forget to end your welcome message with j.end)`
+      );
+    }
+
     let filter = (m) => !m.author.bot;
     let collector = new Discord.MessageCollector(msg.channel, filter);
 
@@ -24,6 +42,26 @@ module.exports = async (msg, args, store) => {
           `\nMessage: ` +
           m.content
       );
+
+      if (msg.author.id === m.author.id && m.content.includes(`j.editBoth`)) {
+        msg.channel.send(
+          `${msg.author}, what would you like your welcome message to be?\n(Don't forget to end your welcome message with j.end)`
+        );
+      } else if (
+        msg.author.id === m.author.id &&
+        m.content.includes(`j.editMessage`)
+      ) {
+        msg.channel.send(
+          `${msg.author}, what would you like your welcome message to be?\n(Don't forget to end your welcome message with j.messageEnd)`
+        );
+      } else if (
+        msg.author.id === m.author.id &&
+        m.content.includes(`j.editChannel`)
+      ) {
+        msg.channel.send(
+          `${msg.author}, where would you like the welcome message to go? Please enter the channel name only`
+        );
+      }
 
       if (msg.author.id === m.author.id && m.content.includes(`j.end`)) {
         let welcomeMsg = m.content.slice(0, m.content.length - 5);
@@ -45,6 +83,27 @@ module.exports = async (msg, args, store) => {
         await guildInfo.save();
 
         store.dispatch(guildWelcomeMessageUpdated(serverCache(guildInfo)));
+      }
+
+      if (msg.author.id === m.author && m.content.includes(`j.messageEnd`)) {
+        let welcomeMsg = m.content.slice(0, m.content.length - 5);
+        console.log(
+          `\n** Welcome Message has been collected below**`,
+          `\n ${welcomeMsg}`
+        );
+
+        let guildInfo = await ServerInfo.findOne({
+          server_id: msg.channel.guild.id,
+        });
+
+        guildInfo.WelcomeMessage.MessageInfo = welcomeMsg;
+        await guildInfo.save();
+
+        store.dispatch(guildWelcomeMessageUpdated(serverCache(guildInfo)));
+
+        console.log(`Channel has been collected: `, `${channel}`);
+        msg.channel.send(`${msg.author}, Thanks I'll remember that!`);
+        collector.stop();
       }
 
       if (msg.author.id === m.author.id && m.content.startsWith(`<#`)) {
@@ -70,3 +129,5 @@ module.exports = async (msg, args, store) => {
     );
   }
 };
+
+// edge cases
