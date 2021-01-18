@@ -21,51 +21,13 @@ const guildsSlice = createSlice({
       action.payload.id = id;
       guildsAdapter.removeOne(state, action.payload);
     },
-    guildEatRoleUpdated(state, action) {
-      const { _id, EatRole } = action.payload;
-      const guild = state.entities[_id];
-      if (guild) {
-        guild.EatRole = EatRole;
-      }
-    },
-    guildWelcomeMessageUpdated(state, action) {
-      const { _id, WelcomeMessage } = action.payload;
-      const guild = state.entities[_id];
-      if (guild) {
-        if (guild.WelcomeMessage.MessageInfo !== WelcomeMessage.MessageInfo) {
-          guild.WelcomeMessage.MessageInfo = WelcomeMessage.MessageInfo;
-        }
-
-        if (
-          guild.WelcomeMessage.WelcomeChannel !== WelcomeMessage.WelcomeChannel
-        ) {
-          guild.WelcomeMessage.WelcomeChannel = WelcomeMessage.WelcomeChannel;
-        }
-      }
-    },
-    guildRoleEmojiUpdated(state, action) {
-      const { _id, RoleReactions } = action.payload;
-      const guild = state.entities[_id];
-      if (guild) {
-        if (guild.RoleReactions.Message_ID !== RoleReactions.Message_ID) {
-          guild.RoleReactions.Message_ID = RoleReactions.Message_ID;
-        }
-
-        if (
-          JSON.stringify(guild.RoleReactions.RoleMappings) !==
-          JSON.stringify(RoleReactions.RoleMappings)
-        ) {
-          guild.RoleReactions.RoleMappings = RoleReactions.RoleMappings;
-        }
-      }
-    },
-    guildServerClockUpdated(state, action) {
+    guildDataUpdated(state, action) {
       const id = selectId(action.payload);
       action.payload.id = id;
       const guild = state.entities[id];
 
       if (guild) {
-        guildsAdapter.upsertOne(state, action.payload);
+        guildsAdapter.updateOne(state, action.payload);
       }
     },
     // guildListenInfoUpdated(state, action) {
@@ -76,10 +38,7 @@ const guildsSlice = createSlice({
 const {
   guildAdded,
   guildRemoved,
-  guildEatRoleUpdated,
-  guildWelcomeMessageUpdated,
-  guildRoleEmojiUpdated,
-  guildServerClockUpdated,
+  guildDataUpdated,
   // guildListenInfoUpdated,
 } = guildsSlice.actions;
 
@@ -88,9 +47,6 @@ module.exports = {
   guildsSlice,
   guildAdded,
   guildRemoved,
-  guildEatRoleUpdated,
-  guildWelcomeMessageUpdated,
-  guildRoleEmojiUpdated,
-  guildServerClockUpdated,
+  guildDataUpdated,
   // guildListenInfoUpdated,
 };

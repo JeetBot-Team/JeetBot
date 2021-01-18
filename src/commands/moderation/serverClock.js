@@ -1,10 +1,7 @@
 const Discord = require(`discord.js`);
 const ServerInfo = require(`../../database/models/dbdiscordserverinfo`);
 const { serverCache } = require(`../../utils/botUtils`);
-const {
-  guildServerClockUpdated,
-  guildsSelector,
-} = require(`../../redux/guildsSlice`);
+const { guildDataUpdated, guildsSelector } = require(`../../redux/guildsSlice`);
 
 // Setting timezone
 const dayjs = require(`dayjs`);
@@ -96,7 +93,7 @@ module.exports = async (msg, args, store) => {
           newChannelInfo.id || newChannelInfo.channel_ID;
         guildInfo.server_clock.last_recorded_time = `Server Time: ${clock}`;
 
-        store.dispatch(guildServerClockUpdated(serverCache(guildInfo)));
+        store.dispatch(guildDataUpdated(serverCache(guildInfo)));
         await guildInfo.save();
 
         msg.channel.send(

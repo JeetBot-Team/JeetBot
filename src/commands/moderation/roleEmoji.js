@@ -1,6 +1,6 @@
 const Discord = require(`discord.js`);
 const ServerInfo = require(`../../database/models/dbdiscordserverinfo`);
-const { guildRoleEmojiUpdated } = require(`../../redux/guildsSlice`);
+const { guildDataUpdated } = require(`../../redux/guildsSlice`);
 const { serverCache } = require(`../../utils/botUtils`);
 
 module.exports = async (msg, args, store) => {
@@ -43,7 +43,7 @@ module.exports = async (msg, args, store) => {
 
         guildInfo.RoleReactions.Message_ID = roleEmojiMsgId;
 
-        store.dispatch(guildRoleEmojiUpdated(serverCache(guildInfo)));
+        store.dispatch(guildDataUpdated(serverCache(guildInfo)));
         await guildInfo.save();
       }
 
@@ -103,7 +103,7 @@ module.exports = async (msg, args, store) => {
           server_id: msg.channel.guild.id,
         });
 
-        store.dispatch(guildRoleEmojiUpdated(serverCache(guildInfo)));
+        store.dispatch(guildDataUpdated(serverCache(guildInfo)));
         collector.stop();
       }
     });
