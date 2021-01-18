@@ -1,9 +1,6 @@
 const Discord = require(`discord.js`);
 const ServerInfo = require(`../../database/models/dbdiscordserverinfo`);
-const {
-  guildWelcomeMessageUpdated,
-  guildsSelector,
-} = require(`../../redux/guildsSlice`);
+const { guildDataUpdated, guildsSelector } = require(`../../redux/guildsSlice`);
 const { serverCache } = require(`../../utils/botUtils`);
 
 module.exports = async (msg, args, store) => {
@@ -82,7 +79,7 @@ module.exports = async (msg, args, store) => {
 
         await guildInfo.save();
 
-        store.dispatch(guildWelcomeMessageUpdated(serverCache(guildInfo)));
+        store.dispatch(guildDataUpdated(serverCache(guildInfo)));
       }
 
       if (msg.author.id === m.author && m.content.includes(`j.messageEnd`)) {
@@ -99,7 +96,7 @@ module.exports = async (msg, args, store) => {
         guildInfo.WelcomeMessage.MessageInfo = welcomeMsg;
         await guildInfo.save();
 
-        store.dispatch(guildWelcomeMessageUpdated(serverCache(guildInfo)));
+        store.dispatch(guildDataUpdated(serverCache(guildInfo)));
 
         console.log(`Channel has been collected: `, `${channel}`);
         msg.channel.send(`${msg.author}, Thanks I'll remember that!`);
@@ -115,7 +112,7 @@ module.exports = async (msg, args, store) => {
 
         guildInfo.WelcomeMessage.WelcomeChannel = channel;
         await guildInfo.save();
-        store.dispatch(guildWelcomeMessageUpdated(serverCache(guildInfo)));
+        store.dispatch(guildDataUpdated(serverCache(guildInfo)));
 
         console.log(`Channel has been collected: `, `${channel}`);
         msg.channel.send(`${msg.author}, Thanks I'll remember that!`);

@@ -21,7 +21,7 @@ const {
   guildsSelector,
   guildAdded,
   guildRemoved,
-  guildServerClockUpdated,
+  guildDataUpdated,
 } = require(`./redux/guildsSlice`);
 
 // Utils
@@ -318,7 +318,7 @@ client.on(`message`, async (message) => {
         "after change clock": guildInfoToUpdate.server_clock.last_recorded_time,
       });
       // save it to the store
-      store.dispatch(guildServerClockUpdated(serverCache(guildInfoToUpdate)));
+      store.dispatch(guildDataUpdated(serverCache(guildInfoToUpdate)));
       // find channel
       let channel = await message.guild.channels.cache.get(
         guildInfo.server_clock.channel_ID
