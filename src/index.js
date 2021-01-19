@@ -25,7 +25,7 @@ const {
 } = require(`./redux/guildsSlice`);
 
 // Utils
-const { serverCache } = require(`./utils/botUtils`);
+const { serverCache, logger } = require(`./utils/botUtils`);
 
 // Date/Time
 const dayjs = require(`dayjs`);
@@ -34,18 +34,12 @@ const timezone = require(`dayjs/plugin/timezone`);
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
-// Logger
-const pino = require(`pino`);
-const logger = pino({
-  prettyPrint: true,
-});
-
 // When the bot turns on
 // Turn on the connection to DB and retrieve all Discord Servers and their specialized info
 client.once(`ready`, async () => {
   database
     .then(() => logger.info(`${client.user.tag} is connected to MongoDB.`))
-    .catch((err) => logger.info(err));
+    .catch((err) => logger.error(err));
 
   try {
     await Promise.all(
@@ -68,7 +62,7 @@ client.once(`ready`, async () => {
               `${guild.name} has been saved to the Database & to the Redux Store`
             );
           } catch (err) {
-            logger.info(err);
+            logger.error(err);
           }
         } else {
           store.dispatch(guildAdded(serverCache(guildInfo)));
@@ -79,7 +73,7 @@ client.once(`ready`, async () => {
       })
     );
   } catch (err) {
-    logger.info(err);
+    logger.error(err);
   } finally {
     logger.info(`*** This is the Store's status ***\n`, store.getState());
     logger.info(`${client.user.tag} is Ready To Rock And Roll!`);
@@ -108,7 +102,7 @@ client.on(`guildCreate`, async (guild) => {
         `${guild.name} has been saved to the Database && Redux Store`
       );
     } catch (err) {
-      logger.info(err);
+      logger.error(err);
     }
   } else {
     logger.info(`${guild.name} exists in the Database`);
@@ -129,7 +123,7 @@ client.on(`guildDelete`, async (guild) => {
       await guildInfo.deleteOne();
       logger.info(`${guild.name} has been deleted from the Database`);
     } catch (err) {
-      logger.info(err);
+      logger.error(err);
     }
   } else {
     logger.info(`${guild.name} does not exist in the Database`);
@@ -204,13 +198,13 @@ client.on(`messageReactionAdd`, async (reaction, user) => {
         logger.info(`Role added to Member!`);
       }
     } catch (err) {
-      logger.info(err);
+      logger.error(err);
     }
   };
 
   if (reaction.message.partial) {
     let reactionMessage = await reaction.message.fetch().catch((error) => {
-      logger.info(
+      logger.error(
         `Something went wrong when fetching a partial message: `,
         error
       );
@@ -297,7 +291,7 @@ client.on(`message`, async (message) => {
               `Ffej has deleted message from ${msg.author.username} in Discord Server: ${msg.channel.guild.name}`
             )
           )
-          .catch((err) => logger.info(err));
+          .catch((err) => logger.error(err));
       }
     }
   }
