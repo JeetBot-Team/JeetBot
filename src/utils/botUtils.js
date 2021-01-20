@@ -1,6 +1,8 @@
+const { dev } = require(`../../bot.config`);
+
 const pino = require(`pino`);
 const logger = pino({
-  prettyPrint: true,
+  prettyPrint: dev ? true : false,
   timestamp: false,
 });
 
