@@ -1,8 +1,9 @@
+const { logger } = require(`../../utils/botUtils`);
 const Discord = require(`discord.js`);
 
 module.exports = async (msg) => {
   msg.channel.bulkDelete(1, true).catch((err) => {
-    console.error(err);
+    logger.error(err);
     msg.channel.send(
       `There was an error trying to delete the last message in this channel!`
     );

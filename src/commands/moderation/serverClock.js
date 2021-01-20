@@ -1,6 +1,6 @@
 const Discord = require(`discord.js`);
 const ServerInfo = require(`../../database/models/dbdiscordserverinfo`);
-const { serverCache } = require(`../../utils/botUtils`);
+const { serverCache, logger } = require(`../../utils/botUtils`);
 const { guildDataUpdated, guildsSelector } = require(`../../redux/guildsSlice`);
 
 // Setting timezone
@@ -12,7 +12,7 @@ dayjs.extend(timezone);
 
 module.exports = async (msg, args, store) => {
   if (msg.member.hasPermission([`BAN_MEMBERS`])) {
-    console.log(
+    logger.info(
       `${msg.author.username} can ban members from Discord Server: ${msg.guild}`
     );
 
@@ -24,7 +24,7 @@ module.exports = async (msg, args, store) => {
 
     if (clientGuildInfo.server_clock) {
       newChannelInfo = clientGuildInfo.server_clock;
-      console.log(`${msg.guild} has an existing server clock`);
+      logger.info(`${msg.guild} has an existing server clock`);
     }
     // if they have a server clock already made,
     // allow them to change the timezone for that otherwise create a new voice channel for it
@@ -37,13 +37,8 @@ module.exports = async (msg, args, store) => {
     let collector = new Discord.MessageCollector(msg.channel, filter);
 
     collector.on(`collect`, async (m, col) => {
-      console.log(
-        `\nChannel: ` +
-          msg.channel.name +
-          `\nUser: ` +
-          m.author.tag +
-          `\nMessage: ` +
-          m.content
+      logger.info(
+        `\nChannel: ${msg.channel.name}\nUser: ${m.author.tag}\nMessage: ${m.content}`
       );
 
       if (msg.author.id === m.author.id && m.content.startsWith(`j.entry`)) {
@@ -59,10 +54,7 @@ module.exports = async (msg, args, store) => {
           );
         }
 
-        console.log(
-          `timeZoneSetting has been collected: `,
-          `${timeZoneSetting}`
-        );
+        logger.info(`timeZoneSetting has been collected: ${timeZoneSetting}`);
 
         // parse the clock time
         const clock = dayjs().tz(timeZoneSetting).format(`hh:mm A`);
@@ -75,13 +67,12 @@ module.exports = async (msg, args, store) => {
               userLimit: 0,
             }
           );
-          console.log({ id: newChannelInfo.id });
         } else if (newChannelInfo.channel_ID) {
           // change the existing server clock
           // find the channel using channel_ID
           let channel = m.guild.channels.cache.get(newChannelInfo.channel_ID);
           await channel.edit({ name: `Server Time: ${clock}` });
-          console.log(`clock in ${msg.guild} changed timezones`);
+          logger.info(`clock in ${msg.guild} changed timezones`);
         }
 
         let guildInfo = await ServerInfo.findOne({
@@ -99,7 +90,7 @@ module.exports = async (msg, args, store) => {
         msg.channel.send(
           `${msg.author}, thanks! I made the changes you've requested. The clock is set at the top of the server channels`
         );
-        console.log(`Task done, collector stopped`);
+        logger.info(`Task done, collector stopped`);
         collector.stop();
       }
 
@@ -111,7 +102,7 @@ module.exports = async (msg, args, store) => {
       }
     });
   } else {
-    console.log(`This member cannot create a server clock`);
+    logger.warn(`This member cannot create a server clock`);
     return msg.channel.send(
       `${msg.author.username} does not have the authority to create a server clock`
     );

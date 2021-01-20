@@ -1,4 +1,6 @@
+const { logger } = require(`../../utils/botUtils`);
+
 module.exports = async (msg) => {
   await msg.channel.send(`pong`);
-  console.log(`Ping Pong! (sent)`);
+  logger.info(`Ping Pong! (sent)`);
 };

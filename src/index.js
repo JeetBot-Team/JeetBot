@@ -305,18 +305,18 @@ client.on(`message`, async (message) => {
     // if time is different, change time
     if (currentTime != guildInfo.server_clock.last_recorded_time) {
       // change the time
-      logger.info({ currentTime });
-      logger.info({
-        "before change clock": guildInfo.server_clock.last_recorded_time,
-      });
+      // logger.info({ currentTime });
+      // logger.info({
+      //   "before change clock": guildInfo.server_clock.last_recorded_time,
+      // });
 
       let guildInfoToUpdate = await ServerInfo.findOne({
         server_id: message.channel.guild.id,
       });
       guildInfoToUpdate.server_clock.last_recorded_time = currentTime;
-      logger.info({
-        "after change clock": guildInfoToUpdate.server_clock.last_recorded_time,
-      });
+      // logger.info({
+      //   "after change clock": guildInfoToUpdate.server_clock.last_recorded_time,
+      // });
       // save it to the store
       store.dispatch(guildDataUpdated(serverCache(guildInfoToUpdate)));
       // find channel
