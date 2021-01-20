@@ -25,7 +25,7 @@ const {
 } = require(`./redux/guildsSlice`);
 
 // Utils
-const { serverCache } = require(`./utils/botUtils`);
+const { serverCache, logger } = require(`./utils/botUtils`);
 
 // Date/Time
 const dayjs = require(`dayjs`);
@@ -38,8 +38,8 @@ dayjs.extend(timezone);
 // Turn on the connection to DB and retrieve all Discord Servers and their specialized info
 client.once(`ready`, async () => {
   database
-    .then(() => console.log(`${client.user.tag} is connected to MongoDB.`))
-    .catch((err) => console.log(err));
+    .then(() => logger.info(`${client.user.tag} is connected to MongoDB.`))
+    .catch((err) => logger.error(err));
 
   try {
     await Promise.all(
@@ -58,31 +58,31 @@ client.once(`ready`, async () => {
           try {
             await serverInfo.save();
             store.dispatch(guildAdded(serverCache(guildInfo)));
-            console.log(
+            logger.info(
               `${guild.name} has been saved to the Database & to the Redux Store`
             );
           } catch (err) {
-            console.log(err);
+            logger.error(err);
           }
         } else {
           store.dispatch(guildAdded(serverCache(guildInfo)));
-          console.log(
+          logger.info(
             `${guild.name} exists in the Database & has been added to Redux Store`
           );
         }
       })
     );
   } catch (err) {
-    console.log(err);
+    logger.error(err);
   } finally {
-    console.log(`*** This is the Store's status ***\n`, store.getState());
-    console.log(`${client.user.tag} is Ready To Rock And Roll!`);
+    logger.info(`*** This is the Store's status ***\n`, store.getState());
+    logger.info(`${client.user.tag} is Ready To Rock And Roll!`);
   }
 });
 
 // When Jeet joins a new server
 client.on(`guildCreate`, async (guild) => {
-  console.log(`Jeet has joined a new Discord server: ${guild.name}`);
+  logger.info(`Jeet has joined a new Discord server: ${guild.name}`);
 
   let guildInfo = await ServerInfo.findOne({
     server_id: guild.id,
@@ -98,20 +98,20 @@ client.on(`guildCreate`, async (guild) => {
     try {
       await serverInfo.save();
       store.dispatch(guildAdded(serverCache(serverInfo)));
-      console.log(
+      logger.info(
         `${guild.name} has been saved to the Database && Redux Store`
       );
     } catch (err) {
-      console.log(err);
+      logger.error(err);
     }
   } else {
-    console.log(`${guild.name} exists in the Database`);
+    logger.info(`${guild.name} exists in the Database`);
   }
 });
 
 // Jeet has been kicked off the server
 client.on(`guildDelete`, async (guild) => {
-  console.log(`Jeet has been kicked from ${guild.name}`);
+  logger.info(`Jeet has been kicked from ${guild.name}`);
 
   let guildInfo = await ServerInfo.findOne({
     server_id: guild.id,
@@ -121,12 +121,12 @@ client.on(`guildDelete`, async (guild) => {
     try {
       store.dispatch(guildRemoved(serverCache(guildInfo)));
       await guildInfo.deleteOne();
-      console.log(`${guild.name} has been deleted from the Database`);
+      logger.info(`${guild.name} has been deleted from the Database`);
     } catch (err) {
-      console.log(err);
+      logger.error(err);
     }
   } else {
-    console.log(`${guild.name} does not exist in the Database`);
+    logger.info(`${guild.name} does not exist in the Database`);
   }
 });
 
@@ -149,7 +149,7 @@ client.on(`guildMemberAdd`, async (member) => {
       return;
     }
   } else {
-    console.log(
+    logger.info(
       `Jeet cannot find this server ${member.guild.id} in the client side storage.\nJeet will fetch this server and add it to the Redux Store.`
     );
 
@@ -193,18 +193,18 @@ client.on(`messageReactionAdd`, async (reaction, user) => {
 
     try {
       if (role && member) {
-        console.log(`Role & Member Found!`);
+        logger.info(`Role & Member Found!`);
         await member.roles.add(role);
-        console.log(`Role added to Member!`);
+        logger.info(`Role added to Member!`);
       }
     } catch (err) {
-      console.log(err);
+      logger.error(err);
     }
   };
 
   if (reaction.message.partial) {
     let reactionMessage = await reaction.message.fetch().catch((error) => {
-      console.log(
+      logger.error(
         `Something went wrong when fetching a partial message: `,
         error
       );
@@ -218,7 +218,7 @@ client.on(`messageReactionAdd`, async (reaction, user) => {
     let roleSelectMessageId = guildInfo.RoleReactions.Message_ID;
 
     if (reactionMessage.id === roleSelectMessageId) {
-      console.log(
+      logger.info(
         `Someone reacted to a message\nFetched the Partial Message & reactionID = roleSelectID`
       );
       applyRole(guildInfo.RoleReactions.RoleMappings);
@@ -231,7 +231,7 @@ client.on(`messageReactionAdd`, async (reaction, user) => {
     let roleSelectMessageId = guildInfo.RoleReactions.Message_ID;
 
     if (reaction.message.id === roleSelectMessageId) {
-      console.log(
+      logger.info(
         `Someone reacted to a message\nThe message was not partial\nReaction Message = Role Message Id`
       );
       applyRole(guildInfo.RoleReactions.RoleMappings);
@@ -261,7 +261,7 @@ client.on(`message`, async (message) => {
       store.getState(),
       message.channel.guild.id
     );
-    console.log(`*** This is the Guild Info You Requested ***\n`, test);
+    logger.info(`*** This is the Guild Info You Requested ***\n`, test);
   }
 
   let guildInfo = guildsSelector.selectById(
@@ -278,7 +278,7 @@ client.on(`message`, async (message) => {
 
   if (member && role) {
     if (member._roles.includes(role.id)) {
-      console.log(
+      logger.info(
         `${message.author.username} in ${message.channel.guild.name} has a chance to get their messages eaten by Ffej.`
       );
       let chance = Math.floor(Math.random() * 100) + 1;
@@ -287,11 +287,11 @@ client.on(`message`, async (message) => {
         message
           .delete()
           .then((msg) =>
-            console.log(
+            logger.info(
               `Ffej has deleted message from ${msg.author.username} in Discord Server: ${msg.channel.guild.name}`
             )
           )
-          .catch((err) => console.log(err));
+          .catch((err) => logger.error(err));
       }
     }
   }
@@ -305,18 +305,18 @@ client.on(`message`, async (message) => {
     // if time is different, change time
     if (currentTime != guildInfo.server_clock.last_recorded_time) {
       // change the time
-      console.log({ currentTime });
-      console.log({
-        "before change clock": guildInfo.server_clock.last_recorded_time,
-      });
+      // logger.info({ currentTime });
+      // logger.info({
+      //   "before change clock": guildInfo.server_clock.last_recorded_time,
+      // });
 
       let guildInfoToUpdate = await ServerInfo.findOne({
         server_id: message.channel.guild.id,
       });
       guildInfoToUpdate.server_clock.last_recorded_time = currentTime;
-      console.log({
-        "after change clock": guildInfoToUpdate.server_clock.last_recorded_time,
-      });
+      // logger.info({
+      //   "after change clock": guildInfoToUpdate.server_clock.last_recorded_time,
+      // });
       // save it to the store
       store.dispatch(guildDataUpdated(serverCache(guildInfoToUpdate)));
       // find channel
@@ -326,7 +326,7 @@ client.on(`message`, async (message) => {
       // change time on clock
       await channel.edit({ name: currentTime });
     } else {
-      console.log(`Time doesn't need to be changed`);
+      logger.info(`Time doesn't need to be changed`);
     }
   }
 });

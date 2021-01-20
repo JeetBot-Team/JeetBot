@@ -1,6 +1,8 @@
+const { logger } = require(`../../utils/botUtils`);
+
 module.exports = async (msg) => {
   if (!msg.mentions.users.size) {
-    console.log(`An avatar was summoned!`);
+    logger.info(`An avatar was summoned!`);
     return msg.channel.send(
       `Your avatar: <${msg.author.displayAvatarURL({
         format: `png`,
@@ -16,7 +18,7 @@ module.exports = async (msg) => {
     })}>`;
   });
 
-  console.log(`${avatarList.length} avatars were summoned!`);
+  logger.info(`${avatarList.length} avatars were summoned!`);
 
   msg.channel.send(avatarList);
 };

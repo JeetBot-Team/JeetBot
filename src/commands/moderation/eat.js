@@ -1,11 +1,11 @@
 const Discord = require(`discord.js`);
 const ServerInfo = require(`../../database/models/dbdiscordserverinfo`);
 const { guildDataUpdated } = require(`../../redux/guildsSlice`);
-const { serverCache } = require(`../../utils/botUtils`);
+const { serverCache, logger } = require(`../../utils/botUtils`);
 
 module.exports = async (msg, args, store) => {
   if (msg.member.hasPermission([`MANAGE_ROLES`])) {
-    console.log(
+    logger.info(
       `${msg.author.username} can manage roles from Discord Server: ${msg.guild}`
     );
 
@@ -16,13 +16,8 @@ module.exports = async (msg, args, store) => {
     let collector = new Discord.MessageCollector(msg.channel, filter);
 
     collector.on(`collect`, async (m, col) => {
-      console.log(
-        `\nChannel: ` +
-          msg.channel.name +
-          `\nUser: ` +
-          m.author.tag +
-          `\nMessage: ` +
-          m.content
+      logger.info(
+        `\nChannel: ${msg.channel.name}\nUser: ${m.author.tag}\nMessage: ${m.content}`
       );
 
       if (msg.author.id === m.author.id && m.content.includes(`j.this`)) {
@@ -34,7 +29,7 @@ module.exports = async (msg, args, store) => {
         role = msg.guild.roles.cache.find((role) => role.id === role.id);
 
         if (role) {
-          console.log(`The role Ffej will eat is `, `${roleID}`);
+          logger.info(`The role Ffej will eat is `, `${roleID}`);
 
           try {
             let guildInfo = await ServerInfo.findOne({
@@ -51,7 +46,7 @@ module.exports = async (msg, args, store) => {
 
             collector.stop();
           } catch (err) {
-            console.log(err);
+            logger.error(err);
           }
         } else {
           msg.channel.send(
@@ -68,7 +63,7 @@ module.exports = async (msg, args, store) => {
       }
     });
   } else {
-    console.log(`This member cannot tell Ffej which role to eat`);
+    logger.warn(`This member cannot tell Ffej which role to eat`);
     msg.channel.send(
       `${msg.author.username} does not have the authority to tell Ffej what to do.`
     );
