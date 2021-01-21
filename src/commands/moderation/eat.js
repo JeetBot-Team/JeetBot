@@ -21,15 +21,28 @@ module.exports = async (msg, args, store) => {
       );
 
       if (msg.author.id === m.author.id && m.content.includes(`j.this`)) {
-        let roleID = m.content.slice(
-          m.content.indexOf(`&`) + 1,
-          m.content.indexOf(`>`)
-        );
+        let roleID = undefined;
+        // would be better if regex could capture <@ and >
+        const regex = /([\d])/g;
 
-        role = msg.guild.roles.cache.find((role) => role.id === role.id);
+        roleID = m.content.match(regex);
+
+        if (roleID) {
+          roleID = roleID.join(``);
+        } else {
+          logger.error(`Incorrect input after j.this`);
+          msg.channel.send(
+            `${msg.author}, you've entered incorrect input after j.this. Please enter a valid role.\nPlease type your answer in this format: **j.this @role**\nIf you do not want to change the message, type in **j.stop**`
+          );
+          return;
+        }
+
+        const role = m.guild.roles.cache.find((role) => role.id === roleID);
 
         if (role) {
-          logger.info(`The role Ffej will eat is `, `${roleID}`);
+          logger.info(
+            `The role Ffej will eat is ${role.name} with an ID: ${role.id}`
+          );
 
           try {
             let guildInfo = await ServerInfo.findOne({
@@ -41,7 +54,7 @@ module.exports = async (msg, args, store) => {
             store.dispatch(guildDataUpdated(serverCache(guildInfo)));
 
             msg.channel.send(
-              `${msg.author}, I've told Ffej to bully users with the role you've mentioned.`
+              `${msg.author}, I've told Ffej to bully users with the ${role.name} role you've mentioned.`
             );
 
             collector.stop();
@@ -49,6 +62,7 @@ module.exports = async (msg, args, store) => {
             logger.error(err);
           }
         } else {
+          logger.error(`Role does not exist`);
           msg.channel.send(
             `${msg.author}, That is not a valid role on your server. Please enter a valid role.\nPlease type your answer in this format: **j.this @role**\nIf you do not want to change the message, type in **j.stop**`
           );
