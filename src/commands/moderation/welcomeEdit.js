@@ -56,7 +56,7 @@ module.exports = async (msg, args, store) => {
       }
 
       if (msg.author.id === m.author.id && m.content.includes(`j.end`)) {
-        let welcomeMsg = m.content.slice(0, m.content.length - 5);
+        let welcomeMsg = m.content.slice().replace(/( j.end|j.end)/g, ``);
         logger.info(
           `\n** Welcome Message has been collected below**\n ${welcomeMsg}`
         );
@@ -76,8 +76,10 @@ module.exports = async (msg, args, store) => {
         store.dispatch(guildDataUpdated(serverCache(guildInfo)));
       }
 
-      if (msg.author.id === m.author && m.content.includes(`j.messageEnd`)) {
-        let welcomeMsg = m.content.slice(0, m.content.length - 5);
+      if (msg.author.id === m.author.id && m.content.includes(`j.messageEnd`)) {
+        let welcomeMsg = m.content
+          .slice()
+          .replace(/( j.messageEnd|j.messageEnd)/g, ``);
         logger.info(
           `\n** Welcome Message has been collected below**\n ${welcomeMsg}`
         );
@@ -87,17 +89,33 @@ module.exports = async (msg, args, store) => {
         });
 
         guildInfo.WelcomeMessage.MessageInfo = welcomeMsg;
+        logger.info({
+          "guildInfo.WelcomeMessage.MessageInfo":
+            guildInfo.WelcomeMessage.MessageInfo,
+        });
         await guildInfo.save();
 
         store.dispatch(guildDataUpdated(serverCache(guildInfo)));
-
-        logger.info(`Channel has been collected: ${channel}`);
         msg.channel.send(`${msg.author}, Thanks I'll remember that!`);
         collector.stop();
       }
 
       if (msg.author.id === m.author.id && m.content.startsWith(`<#`)) {
-        let channel = m.content.slice(2, m.content.length - 1);
+        let channel;
+        const regex = /([<#\d>])+/;
+        channel = m.content.match(regex);
+
+        logger.info({ channel });
+        if (channel[0].includes(`<#`)) {
+          channel = channel[0].slice(2, channel[0].length - 1);
+          // note to revamp later
+        } else {
+          logger.error(`Cannot find channel`);
+          msg.channel.send(
+            `${msg.author}, you've entered an incorrect channel name. Please enter a valid channel.`
+          );
+          return;
+        }
 
         let guildInfo = await ServerInfo.findOne({
           server_id: msg.channel.guild.id,

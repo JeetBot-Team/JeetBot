@@ -42,8 +42,13 @@ module.exports = async (msg, args, store) => {
       );
 
       if (msg.author.id === m.author.id && m.content.startsWith(`j.entry`)) {
-        // use regex later
-        let timeZoneSetting = m.content.slice(8);
+        // give options and validate
+        // write down the choices they have for date/time
+        // if it can't be converted properly, force them to return
+
+        let timeZoneSetting = m.content
+          .slice()
+          .replace(/(j.entry |j.entry)/g, ``);
         let testClock;
 
         try {

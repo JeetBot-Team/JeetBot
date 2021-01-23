@@ -3,6 +3,7 @@ const ServerInfo = require(`../../database/models/dbdiscordserverinfo`);
 const { logger } = require(`../../utils/botUtils`);
 // const { guildListenInfoUpdated } = require("../../redux/guildsSlice");
 // need to add case when the bot goes down, to re-activate the listen bot on boot up
+// fixes for later
 
 module.exports = async (msg, args, store) => {
   if (msg.member.hasPermission([`MANAGE_MESSAGES`])) {

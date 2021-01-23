@@ -75,7 +75,7 @@ client.once(`ready`, async () => {
   } catch (err) {
     logger.error(err);
   } finally {
-    logger.info(`*** This is the Store's status ***\n`, store.getState());
+    logger.info(store.getState(), `*** This is the Store's status ***`);
     logger.info(`${client.user.tag} is Ready To Rock And Roll!`);
   }
 });
@@ -261,7 +261,13 @@ client.on(`message`, async (message) => {
       store.getState(),
       message.channel.guild.id
     );
-    logger.info(`*** This is the Guild Info You Requested ***\n`, test);
+    logger.info(
+      { state: test },
+      `${message.channel.guild.name}'s Current State`
+    );
+    message.channel.send(
+      `${message.author.username}, I sent a response to terminal`
+    );
   }
 
   let guildInfo = guildsSelector.selectById(
@@ -297,6 +303,7 @@ client.on(`message`, async (message) => {
   }
 
   // clock settings
+  // clock needs to check every 5 minutes instead of every minute
   if (guildInfo.server_clock) {
     // make date object, compare that to the last recorded time
     const clock = dayjs().tz(guildInfo.server_clock.timezone).format(`hh:mm A`);
