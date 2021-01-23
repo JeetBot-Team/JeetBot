@@ -43,6 +43,7 @@ module.exports = async (msg, args, store) => {
 
       if (msg.author.id === m.author.id && m.content.startsWith(`j.entry`)) {
         // use regex later
+        // give options and validate
         let timeZoneSetting = m.content.slice(8);
         let testClock;
 

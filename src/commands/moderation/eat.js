@@ -22,9 +22,7 @@ module.exports = async (msg, args, store) => {
 
       if (msg.author.id === m.author.id && m.content.includes(`j.this`)) {
         let roleID = undefined;
-        // would be better if regex could capture <@ and >
         const regex = /([<@&\d>])+/;
-
         roleID = m.content.match(regex);
 
         if (roleID) {

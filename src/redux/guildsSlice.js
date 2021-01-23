@@ -27,7 +27,7 @@ const guildsSlice = createSlice({
       const guild = state.entities[id];
 
       if (guild) {
-        guildsAdapter.updateOne(state, action.payload);
+        guildsAdapter.upsertOne(state, action.payload);
       }
     },
     // guildListenInfoUpdated(state, action) {
