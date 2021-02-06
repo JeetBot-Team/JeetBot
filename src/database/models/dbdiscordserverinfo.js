@@ -28,6 +28,11 @@ const DiscordServerInfoSchema = new mongoose.Schema({
       type: [mongoose.Schema.Types.Mixed],
     },
   },
+  gatekeeper: {
+    channel_ID: String,
+    passcode: String,
+    role_bind: String,
+  },
   WelcomeMessage: {
     MessageInfo: {
       type: String,

@@ -18,13 +18,14 @@ const patpat = require(`./fun/patpat`);
 // moderation commands
 const ban = require(`./moderation/ban`);
 const eat = require(`./moderation/eat`);
-const welcomeEdit = require(`./moderation/welcomeEdit`);
+const gatekeep = require(`./moderation/gatekeep`);
 const kick = require(`./moderation/kick`);
 const listen = require(`./moderation/listen`);
 const mute = require(`./moderation/mute`);
 const prune = require(`./moderation/prune`);
 const roleEmoji = require(`./moderation/roleEmoji`);
 const serverClock = require(`./moderation/serverClock`);
+const welcomeEdit = require(`./moderation/welcomeEdit`);
 
 // Prefix
 const PREFIX = process.env.PREFIX;
@@ -48,6 +49,7 @@ const commands = {
   eat,
   patpat,
   clock: serverClock,
+  gatekeep,
 };
 
 module.exports = async (msg, store) => {
