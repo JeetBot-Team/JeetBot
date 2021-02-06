@@ -241,8 +241,69 @@ client.on(`messageReactionAdd`, async (reaction, user) => {
 });
 
 client.on(`messageReactionRemove`, async (reaction, user) => {
-  // need function to remove role when unclick
-  // if there is a gatekeep role bind to it, check for it.
+  let removeRole = async (roleMappings) => {
+    let role = undefined;
+
+    for (let i = 0; i < roleMappings.length; i++) {
+      let emojiId = Object.keys(roleMappings[i]);
+
+      if (parseInt(emojiId, 10) === parseInt(reaction.emoji.id, 10)) {
+        role = reaction.message.guild.roles.cache.find(
+          (role) => role.id === roleMappings[i][emojiId]
+        );
+      }
+    }
+
+    let member = reaction.message.guild.members.cache.find(
+      (member) => member.id === user.id
+    );
+
+    try {
+      if (role && member) {
+        logger.info(`Role & Member Found!`);
+        await member.roles.remove(role);
+        logger.info(`Role removed from Member!`);
+      }
+    } catch (err) {
+      logger.error(err);
+    }
+  };
+
+  if (reaction.message.partial) {
+    let reactionMessage = await reaction.message.fetch().catch((error) => {
+      logger.error(
+        `Something went wrong when fetching a partial message: `,
+        error
+      );
+    });
+
+    let guildInfo = guildsSelector.selectById(
+      store.getState(),
+      reactionMessage.guild.id
+    );
+
+    let roleSelectMessageId = guildInfo.RoleReactions.Message_ID;
+
+    if (reactionMessage.id === roleSelectMessageId) {
+      logger.info(
+        `Someone reacted to a message\nFetched the Partial Message & reactionID = roleSelectID`
+      );
+      removeRole(guildInfo.RoleReactions.RoleMappings);
+    }
+  } else {
+    let guildInfo = guildsSelector.selectById(
+      store.getState(),
+      reaction.message.channel.guild.id
+    );
+    let roleSelectMessageId = guildInfo.RoleReactions.Message_ID;
+
+    if (reaction.message.id === roleSelectMessageId) {
+      logger.info(
+        `Someone reacted to a message\nThe message was not partial\nReaction Message = Role Message Id`
+      );
+      removeRole(guildInfo.RoleReactions.RoleMappings);
+    }
+  }
 });
 
 // Special Messages and EatRole Handler
