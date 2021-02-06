@@ -11,6 +11,7 @@ const ServerInfo = require(`./database/models/dbdiscordserverinfo`);
 
 // Handlers
 const commandHandler = require(`./commands`);
+// need an event handler here
 
 // cooldowns to fix later
 const cooldowns = new Discord.Collection();
@@ -237,6 +238,11 @@ client.on(`messageReactionAdd`, async (reaction, user) => {
       applyRole(guildInfo.RoleReactions.RoleMappings);
     }
   }
+});
+
+client.on(`messageReactionRemove`, async (reaction, user) => {
+  // need function to remove role when unclick
+  // if there is a gatekeep role bind to it, check for it.
 });
 
 // Special Messages and EatRole Handler

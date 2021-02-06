@@ -76,13 +76,13 @@ module.exports = async (msg, args, store) => {
 
         store.dispatch(guildDataUpdated(serverCache(guildInfo)));
         msg.channel.send(
-          `${msg.author}, Please let me know what role I should add. Type j.roleCollect when you're done`
+          `${msg.author}, Please let me know what role I should WATCH. Type j.roleWatchCollect when you're done`
         );
       }
 
       if (
         msg.author.id === m.author.id &&
-        m.content.includes(`j.roleCollect`)
+        m.content.includes(`j.roleWatchCollect`)
       ) {
         const regex = /([(<@&|:)\d>])+/g;
         let roleMapping = m.content.match(regex);
@@ -110,7 +110,51 @@ module.exports = async (msg, args, store) => {
           server_id: msg.channel.guild.id,
         });
 
-        guildInfo.gatekeeper.role_bind = roleID;
+        guildInfo.gatekeeper.role_watch = roleID;
+
+        try {
+          await guildInfo.save();
+          store.dispatch(guildDataUpdated(serverCache(guildInfo)));
+          logger.info(`We've saved the role ID to watch into the Database`);
+          msg.channel.send(
+            `${msg.author}, Please let me know what role I should ADD. Type j.roleAddCollect when you're done`
+          );
+        } catch (err) {
+          logger.error(err);
+        }
+      }
+
+      if (
+        msg.author.id === m.author.id &&
+        m.content.includes(`j.roleAddCollect`)
+      ) {
+        const regex = /([(<@&|:)\d>])+/g;
+        let roleMapping = m.content.match(regex);
+
+        logger.info(roleMapping);
+
+        let roleID = roleMapping[0].slice(3, roleMapping[0].length - 1);
+
+        // do validation checks
+        if (roleID) {
+          // do a role ID check
+        } else {
+          logger.error(`Invalid input for roleID`);
+          msg.channel.send(
+            `${msg.author}, the emoji entered was not recognized.\nPlease follow this format: @role j.roleCollect`
+          );
+          return;
+        }
+
+        logger.info(
+          `\nThis is the Role ID Mapping: ${roleMapping}\nThis is the Role ID: ${roleID}`
+        );
+
+        let guildInfo = await ServerInfo.findOne({
+          server_id: msg.channel.guild.id,
+        });
+
+        guildInfo.gatekeeper.role_add = roleID;
 
         try {
           await guildInfo.save();
@@ -119,8 +163,12 @@ module.exports = async (msg, args, store) => {
           msg.channel.send(
             `${msg.author}, Thanks! I saved all the information I needed`
           );
+          collector.stop();
         } catch (err) {
           logger.error(err);
+          msg.channel.send(
+            `${msg.author}, there was an error saving in the database`
+          );
         }
       }
 

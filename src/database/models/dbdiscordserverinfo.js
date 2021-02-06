@@ -31,7 +31,8 @@ const DiscordServerInfoSchema = new mongoose.Schema({
   gatekeeper: {
     channel_ID: String,
     passcode: String,
-    role_bind: String,
+    role_watch: String,
+    role_add: String,
   },
   WelcomeMessage: {
     MessageInfo: {
