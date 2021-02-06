@@ -11,6 +11,7 @@ const ServerInfo = require(`./database/models/dbdiscordserverinfo`);
 
 // Handlers
 const commandHandler = require(`./commands`);
+// need an event handler here
 
 // cooldowns to fix later
 const cooldowns = new Discord.Collection();
@@ -239,6 +240,11 @@ client.on(`messageReactionAdd`, async (reaction, user) => {
   }
 });
 
+client.on(`messageReactionRemove`, async (reaction, user) => {
+  // need function to remove role when unclick
+  // if there is a gatekeep role bind to it, check for it.
+});
+
 // Special Messages and EatRole Handler
 client.on(`message`, async (message) => {
   if (message.author.bot) return;
@@ -247,10 +253,12 @@ client.on(`message`, async (message) => {
 
   if (specialMessage === `good morning jeet!`) {
     message.channel.send(`Good Morning ${message.author.username}`);
+    return;
   }
 
   if (specialMessage === `jeet i love you!`) {
     message.channel.send(`I love you too, ${message.author.username}`);
+    return;
   }
 
   if (
@@ -268,6 +276,8 @@ client.on(`message`, async (message) => {
     message.channel.send(
       `${message.author.username}, I sent a response to terminal`
     );
+
+    return;
   }
 
   let guildInfo = guildsSelector.selectById(
@@ -275,26 +285,72 @@ client.on(`message`, async (message) => {
     message.channel.guild.id
   );
 
-  member = message.guild.members.cache.find(
-    (member) => member.id === message.author.id
-  );
-  role = message.guild.roles.cache.find(
-    (role) => role.id === guildInfo.EatRole
-  );
+  if (guildInfo.EatRole) {
+    let member = message.guild.members.cache.find(
+      (member) => member.id === message.author.id
+    );
+    let role = message.guild.roles.cache.find(
+      (role) => role.id === guildInfo.EatRole
+    );
 
-  if (member && role) {
-    if (member._roles.includes(role.id)) {
-      logger.info(
-        `${message.author.username} in ${message.channel.guild.name} has a chance to get their messages eaten by Ffej.`
+    if (member && role) {
+      if (member._roles.includes(role.id)) {
+        logger.info(
+          `${message.author.username} in ${message.channel.guild.name} has a chance to get their messages eaten by Ffej.`
+        );
+        let chance = Math.floor(Math.random() * 100) + 1;
+
+        if (chance > 0 && chance <= 50) {
+          message
+            .delete()
+            .then((msg) =>
+              logger.info(
+                `Ffej has deleted message from ${msg.author.username} in Discord Server: ${msg.channel.guild.name}`
+              )
+            )
+            .catch((err) => logger.error(err));
+        }
+      }
+    }
+  }
+
+  // check if the guild has gatekeeper info
+  if (guildInfo.gatekeeper) {
+    // get the channel info
+    if (message.channel.id == guildInfo.gatekeeper.channel_ID) {
+      let roleWatch = undefined;
+      roleWatch = message.guild.roles.cache.find(
+        (role) => role.id === guildInfo.gatekeeper.role_watch
       );
-      let chance = Math.floor(Math.random() * 100) + 1;
 
-      if (chance > 0 && chance <= 50) {
+      if (roleWatch) {
+        // test for the passcode found in the channel
+        if (message.content.includes(guildInfo.gatekeeper.passcode)) {
+          let roleAdd = message.guild.roles.cache.find(
+            (role) => role.id === guildInfo.gatekeeper.role_add
+          );
+
+          let member = message.guild.members.cache.find(
+            (member) => member.id === message.author.id
+          );
+
+          await member.roles.add(roleAdd);
+
+          message
+            .delete()
+            .then((msg) =>
+              logger.info(
+                `Jeet has allowed ${msg.author.username} through the gate in Discord Server: ${msg.channel.guild.name}`
+              )
+            )
+            .catch((err) => logger.error(err));
+        }
+      } else {
         message
           .delete()
           .then((msg) =>
             logger.info(
-              `Ffej has deleted message from ${msg.author.username} in Discord Server: ${msg.channel.guild.name}`
+              `Jeet has deleted ${msg.author.username}'s message in Discord Server: ${msg.channel.guild.name} and has denied access`
             )
           )
           .catch((err) => logger.error(err));
