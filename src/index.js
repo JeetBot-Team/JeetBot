@@ -405,13 +405,22 @@ client.on(`message`, async (message) => {
               )
             )
             .catch((err) => logger.error(err));
+        } else {
+          message
+            .delete()
+            .then((msg) =>
+              logger.info(
+                `Jeet has deleted ${msg.author.username}'s message in Discord Server: ${msg.channel.guild.name}.\nThey were typing recklessly in chat.`
+              )
+            )
+            .catch((err) => logger.error(err));
         }
       } else {
         message
           .delete()
           .then((msg) =>
             logger.info(
-              `Jeet has deleted ${msg.author.username}'s message in Discord Server: ${msg.channel.guild.name} and has denied access`
+              `Jeet has deleted ${msg.author.username}'s message in Discord Server: ${msg.channel.guild.name} and has denied access\nThey also did not have the proper role access.`
             )
           )
           .catch((err) => logger.error(err));
