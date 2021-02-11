@@ -29,9 +29,25 @@ module.exports = async (msg, args, store) => {
     // if they have a server clock already made,
     // allow them to change the timezone for that otherwise create a new voice channel for it
 
+    // need to set title and fields here
+    // space to attach image
+    // give options to set fields
+
+    // ask user to set title
+    // set a particular
+
+    // setTimeStamp
+    // set a specific color via hex
+
+    // when setting up a new embed message
+
     msg.channel.send(
-      `${msg.author}, Please enter the timezone you wish your clock to be set in?\nPlease enter the time zone with the continent/major city such as "America/New_York"\nType in "j.entry" at the beginning then the time zone.\nIf you want to exit without making changes, type j.exit`
+      `${msg.author}, Please enter the title of your server clock.\nType in j.clockTitle at the end of your sentence to confirm to the next part`
     );
+
+    // msg.channel.send(
+    //   `${msg.author}, Please enter the timezone you wish your clock to be set in?\nPlease enter the time zone with the continent/major city such as "America/New_York"\nType in "j.entry" at the beginning then the time zone.\nIf you want to exit without making changes, type j.exit`
+    // );
 
     let filter = (m) => !m.author.bot;
     let collector = new Discord.MessageCollector(msg.channel, filter);
@@ -40,6 +56,44 @@ module.exports = async (msg, args, store) => {
       logger.info(
         `\nChannel: ${msg.channel.name}\nUser: ${m.author.tag}\nMessage: ${m.content}`
       );
+
+      if (msg.author.id === m.author.id && m.content.includes(`j.clockTitle`)) {
+        // regex here
+
+        try {
+          // try to grab clockTitle
+        } catch (err) {
+          // if can't grab the clockTitle, send error message and return
+        }
+
+        let guildInfo = await ServerInfo.findOne({
+          server_id: msg.channel.guild.id,
+        });
+
+        // save into database
+        // ask for next option
+        // make sure to end the description with j.clockDescription
+      }
+
+      if (
+        msg.author.id === m.author.id &&
+        m.content.includes(`j.clockDescription`)
+      ) {
+        // regex here
+
+        try {
+          // set the description
+        } catch (err) {
+          // if can't grab the dsecription, send error message and return
+        }
+
+        let guildInfo = await ServerInfo.findOne({
+          server_id: msg.channel.guild.id,
+        });
+
+        // save into database
+        // ask for next option
+      }
 
       if (msg.author.id === m.author.id && m.content.startsWith(`j.entry`)) {
         // give options and validate

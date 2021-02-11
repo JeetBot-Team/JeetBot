@@ -55,6 +55,15 @@ const DiscordServerInfoSchema = new mongoose.Schema({
     last_recorded_time: {
       type: String,
     },
+    embed_message: {
+      title: String,
+      description: String,
+      color: String,
+      img_url: String,
+      fields: {
+        type: [mongoose.Schema.Types.Mixed],
+      },
+    },
   },
 });
 

@@ -428,6 +428,16 @@ client.on(`message`, async (message) => {
     }
   }
 
+  // update this so a new category is made
+  // add a title called status
+  // make an embed message
+  // if embed message exists, make sure it's collected by server to edit
+
+  // embed message has status
+  // server time
+  // time left before date change reset
+  // time left before daily missions reset
+
   // clock settings
   // clock needs to check every 5 minutes instead of every minute
   if (guildInfo.server_clock) {
