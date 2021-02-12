@@ -49,6 +49,9 @@ const DiscordServerInfoSchema = new mongoose.Schema({
     channel_ID: {
       type: String,
     },
+    channel_name: {
+      type: String,
+    },
     timezone: {
       type: String,
     },
