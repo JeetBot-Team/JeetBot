@@ -46,6 +46,12 @@ const DiscordServerInfoSchema = new mongoose.Schema({
     type: String,
   },
   server_clock: {
+    category_name: {
+      type: String,
+    },
+    category_ID: {
+      type: String,
+    },
     channel_ID: {
       type: String,
     },
@@ -66,7 +72,9 @@ const DiscordServerInfoSchema = new mongoose.Schema({
       fields: {
         type: [mongoose.Schema.Types.Mixed],
       },
+      id: String,
     },
+    isActive: Boolean,
   },
 });
 
