@@ -474,19 +474,42 @@ client.on(`message`, async (message) => {
         let hour = time.slice(0, 2);
         let minutes = time.slice(3, 5);
 
-        embed.addField(
-          `${fieldHeader} ${dayjs()
-            .tz(`${guildInfoToUpdate.server_clock.timezone}`)
-            .to(
-              dayjs.tz(
-                `${hour}:${minutes}`,
-                `HH:mm`,
-                `${guildInfoToUpdate.server_clock.timezone}`
-              )
-            )}`,
-          `${fieldText}`,
-          false
-        );
+        if (
+          dayjs().isAfter(
+            dayjs.tz(
+              `${hour}:${minutes}`,
+              `HH:mm`,
+              `${guildInfo.server_clock.timezone}`
+            )
+          )
+        ) {
+          let futureDate = dayjs
+            .tz(
+              `${hour}:${minutes}`,
+              `HH:mm`,
+              `${guildInfo.server_clock.timezone}`
+            )
+            .add(1, `day`);
+          embed.addField(
+            `${fieldHeader} ${dayjs().to(futureDate)}`,
+            `${fieldText}`,
+            false
+          );
+        } else {
+          embed.addField(
+            `${fieldHeader} ${dayjs()
+              .tz(`${guildInfoToUpdate.server_clock.timezone}`)
+              .to(
+                dayjs.tz(
+                  `${hour}:${minutes}`,
+                  `HH:mm`,
+                  `${guildInfoToUpdate.server_clock.timezone}`
+                )
+              )}`,
+            `${fieldText}`,
+            false
+          );
+        }
       }
 
       embedMessage.edit(embed);
