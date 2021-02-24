@@ -1,6 +1,14 @@
+# modules
 node_modules
+.eslintcache
+
+# privacy
 .env
 jeetbot.pem
+
+# in the works
 pending
 marketing
-.eslintcache
+
+# test files
+test.js

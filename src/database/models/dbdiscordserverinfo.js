@@ -46,7 +46,16 @@ const DiscordServerInfoSchema = new mongoose.Schema({
     type: String,
   },
   server_clock: {
+    category_name: {
+      type: String,
+    },
+    category_ID: {
+      type: String,
+    },
     channel_ID: {
+      type: String,
+    },
+    channel_name: {
       type: String,
     },
     timezone: {
@@ -55,6 +64,17 @@ const DiscordServerInfoSchema = new mongoose.Schema({
     last_recorded_time: {
       type: String,
     },
+    embed_message: {
+      title: String,
+      description: String,
+      color: String,
+      img_url: String,
+      fields: {
+        type: [mongoose.Schema.Types.Mixed],
+      },
+      id: String,
+    },
+    isActive: Boolean,
   },
 });
 

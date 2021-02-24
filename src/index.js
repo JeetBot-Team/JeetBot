@@ -26,14 +26,7 @@ const {
 } = require(`./redux/guildsSlice`);
 
 // Utils
-const { serverCache, logger } = require(`./utils/botUtils`);
-
-// Date/Time
-const dayjs = require(`dayjs`);
-const utc = require(`dayjs/plugin/utc`); // dependent on utc plugin
-const timezone = require(`dayjs/plugin/timezone`);
-dayjs.extend(utc);
-dayjs.extend(timezone);
+const { serverCache, logger, dayjs } = require(`./utils/botUtils`);
 
 // When the bot turns on
 // Turn on the connection to DB and retrieve all Discord Servers and their specialized info
@@ -428,38 +421,98 @@ client.on(`message`, async (message) => {
     }
   }
 
-  // clock settings
-  // clock needs to check every 5 minutes instead of every minute
-  if (guildInfo.server_clock) {
+  if (guildInfo.server_clock.isActive) {
     // make date object, compare that to the last recorded time
-    const clock = dayjs().tz(guildInfo.server_clock.timezone).format(`hh:mm A`);
-    let currentTime = `Server Time: ${clock}`;
+    const clock = dayjs()
+      .tz(guildInfo.server_clock.timezone)
+      .format(`ddd hh:mm A z`);
+    let currentTime = `${clock}`;
 
     // if time is different, change time
     if (currentTime != guildInfo.server_clock.last_recorded_time) {
-      // change the time
-      // logger.info({ currentTime });
-      // logger.info({
-      //   "before change clock": guildInfo.server_clock.last_recorded_time,
-      // });
-
       let guildInfoToUpdate = await ServerInfo.findOne({
         server_id: message.channel.guild.id,
       });
+
       guildInfoToUpdate.server_clock.last_recorded_time = currentTime;
-      // logger.info({
-      //   "after change clock": guildInfoToUpdate.server_clock.last_recorded_time,
-      // });
+
       // save it to the store
       store.dispatch(guildDataUpdated(serverCache(guildInfoToUpdate)));
-      // find channel
-      let channel = await message.guild.channels.cache.get(
-        guildInfo.server_clock.channel_ID
+
+      // find embed
+      let channel = await message.guild.channels.cache.find(
+        (ch) => ch.id === guildInfoToUpdate.server_clock.channel_ID
       );
+      let embedMessage = await channel.messages.fetch(
+        guildInfoToUpdate.server_clock.embed_message.id
+      );
+
       // change time on clock
-      await channel.edit({ name: currentTime });
-    } else {
-      logger.info(`Time doesn't need to be changed`);
+
+      // prettier-ignore
+      let embed = new Discord.MessageEmbed()
+        .setTitle(guildInfoToUpdate.server_clock.embed_message.title)
+        .setDescription(guildInfoToUpdate.server_clock.embed_message.description)
+        .setTimestamp()
+        .setColor(guildInfoToUpdate.server_clock.embed_message.color)
+        .setImage(guildInfoToUpdate.server_clock.embed_message.img_url)
+        .addField(
+          `Clock 🕒`,
+          `\`\`\`md
+# ${clock}
+\`\`\``, 
+          false
+        );
+
+      // also add timezone calculation to the second entry in the fields area
+      for (const field of guildInfoToUpdate.server_clock.embed_message.fields) {
+        // do some time calculation here, place it within the embed
+        const fieldHeader = field[Object.keys(field)][0];
+        const fieldText = field[Object.keys(field)][1];
+
+        let time = Object.keys(field).toString();
+        let hour = time.slice(0, 2);
+        let minutes = time.slice(3, 5);
+
+        if (
+          dayjs().isAfter(
+            dayjs.tz(
+              `${hour}:${minutes}`,
+              `HH:mm`,
+              `${guildInfo.server_clock.timezone}`
+            )
+          )
+        ) {
+          let futureDate = dayjs
+            .tz(
+              `${hour}:${minutes}`,
+              `HH:mm`,
+              `${guildInfo.server_clock.timezone}`
+            )
+            .add(1, `day`);
+          embed.addField(
+            `${fieldHeader} ${dayjs().to(futureDate)}`,
+            `${fieldText}`,
+            false
+          );
+        } else {
+          embed.addField(
+            `${fieldHeader} ${dayjs()
+              .tz(`${guildInfoToUpdate.server_clock.timezone}`)
+              .to(
+                dayjs.tz(
+                  `${hour}:${minutes}`,
+                  `HH:mm`,
+                  `${guildInfoToUpdate.server_clock.timezone}`
+                )
+              )}`,
+            `${fieldText}`,
+            false
+          );
+        }
+      }
+
+      embedMessage.edit(embed);
     }
   }
 });

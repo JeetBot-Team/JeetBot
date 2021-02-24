@@ -1,5 +1,18 @@
 const { dev } = require(`../../bot.config`);
 
+const dayjs = require(`dayjs`);
+const customParseFormat = require(`dayjs/plugin/customParseFormat`);
+const utc = require(`dayjs/plugin/utc`);
+const timezone = require(`dayjs/plugin/timezone`);
+const relativeTime = require(`dayjs/plugin/relativeTime`);
+const advancedFormat = require(`dayjs/plugin/advancedFormat`);
+dayjs.extend(advancedFormat);
+dayjs.extend(utc);
+dayjs.extend(timezone);
+dayjs.extend(relativeTime);
+dayjs.extend(customParseFormat);
+
+// Logger
 const pino = require(`pino`);
 const logger = pino({
   prettyPrint: dev ? true : false,
@@ -14,6 +27,7 @@ const serverCache = (guild) => {
 };
 
 module.exports = {
+  dayjs,
   serverCache,
   logger,
 };
