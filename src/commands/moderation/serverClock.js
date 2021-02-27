@@ -340,15 +340,13 @@ module.exports = async (msg, args, store) => {
           let hour = time.slice(0, 2);
           let minutes = time.slice(3, 5);
 
-          if (
-            dayjs().isAfter(
-              dayjs.tz(
-                `${hour}:${minutes}`,
-                `HH:mm`,
-                `${guildInfo.server_clock.timezone}`
-              )
-            )
-          ) {
+          let alarm = dayjs.tz(
+            `${hour}:${minutes}`,
+            `HH:mm`,
+            `${guildInfo.server_clock.timezone}`
+          );
+
+          if (dayjs().isAfter(alarm, `m`)) {
             let futureDate = dayjs
               .tz(
                 `${hour}:${minutes}`,
@@ -363,15 +361,7 @@ module.exports = async (msg, args, store) => {
             );
           } else {
             embed.addField(
-              `${fieldHeader} ${dayjs()
-                .tz(`${guildInfo.server_clock.timezone}`)
-                .to(
-                  dayjs.tz(
-                    `${hour}:${minutes}`,
-                    `HH:mm`,
-                    `${guildInfo.server_clock.timezone}`
-                  )
-                )}`,
+              `${fieldHeader} ${dayjs().to(alarm)}`,
               `${fieldText}`,
               false
             );
