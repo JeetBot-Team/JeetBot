@@ -480,7 +480,9 @@ client.on(`message`, async (message) => {
           `${guildInfoToUpdate.server_clock.timezone}`
         );
 
-        if (dayjs().isAfter(alarm, `m`)) {
+        if (dayjs().isSame(alarm, `m`)) {
+          embed.addField(`${fieldHeader} right now`, `${fieldText}`, false);
+        } else if (dayjs().isAfter(alarm, `m`)) {
           let futureDate = dayjs
             .tz(
               `${hour}:${minutes}`,
