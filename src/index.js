@@ -474,15 +474,15 @@ client.on(`message`, async (message) => {
         let hour = time.slice(0, 2);
         let minutes = time.slice(3, 5);
 
-        if (
-          dayjs().isAfter(
-            dayjs.tz(
-              `${hour}:${minutes}`,
-              `HH:mm`,
-              `${guildInfo.server_clock.timezone}`
-            )
-          )
-        ) {
+        let alarm = dayjs.tz(
+          `${hour}:${minutes}`,
+          `HH:mm`,
+          `${guildInfoToUpdate.server_clock.timezone}`
+        );
+
+        if (dayjs().isSame(alarm, `m`)) {
+          embed.addField(`${fieldHeader} right now`, `${fieldText}`, false);
+        } else if (dayjs().isAfter(alarm, `m`)) {
           let futureDate = dayjs
             .tz(
               `${hour}:${minutes}`,
@@ -497,15 +497,7 @@ client.on(`message`, async (message) => {
           );
         } else {
           embed.addField(
-            `${fieldHeader} ${dayjs()
-              .tz(`${guildInfoToUpdate.server_clock.timezone}`)
-              .to(
-                dayjs.tz(
-                  `${hour}:${minutes}`,
-                  `HH:mm`,
-                  `${guildInfoToUpdate.server_clock.timezone}`
-                )
-              )}`,
+            `${fieldHeader} ${dayjs().to(alarm)}`,
             `${fieldText}`,
             false
           );
