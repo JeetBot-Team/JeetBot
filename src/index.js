@@ -28,6 +28,9 @@ const {
 // Utils
 const { serverCache, logger, dayjs } = require(`./utils/botUtils`);
 
+// Bot Config
+const { dev } = require(`../bot.config`);
+
 // When the bot turns on
 // Turn on the connection to DB and retrieve all Discord Servers and their specialized info
 client.once(`ready`, async () => {
@@ -518,4 +521,8 @@ process.on(`unhandledRejection`, (error) => {
   console.error(`Unhandled promise rejection:`, error);
 });
 
-client.login(process.env.BOT_TOKEN);
+if (!dev) {
+  client.login(process.env.BOT_TOKEN);
+} else {
+  client.login(process.env.TEST_BOT_TOKEN);
+}
