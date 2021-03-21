@@ -3,6 +3,7 @@
 // info commands
 const avatar = require(`./info/avatar`);
 const help = require(`./info/help`);
+const modhelp = require(`./info/modhelp`);
 const ping = require(`./info/ping`);
 const serverInfo = require(`./info/serverInfo`);
 const userInfo = require(`./info/userInfo`);
@@ -50,6 +51,7 @@ const commands = {
   patpat,
   clock: serverClock,
   gatekeep,
+  modhelp,
 };
 
 module.exports = async (msg, store) => {
