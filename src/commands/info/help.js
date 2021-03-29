@@ -25,7 +25,11 @@ module.exports = async (msg) => {
       `Jeet tells the @person a supportive message`,
       false
     )
-    .addField(`j.avatar @person`, `Summons the person's picture avatar`, false)
+    .addField(
+      `j.avatar [@person]`,
+      `Summons the person's picture avatar`,
+      false
+    )
     .addField(`j.ping`, `pong`, false)
     .addField(`j.server`, `Grabs the server info for you`, false)
     .addField(`j.user`, `Grabs info about yourself`, false)

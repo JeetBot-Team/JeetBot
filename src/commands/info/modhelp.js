@@ -15,10 +15,14 @@ module.exports = async (msg) => {
     let embed = new Discord.MessageEmbed()
       .setTitle(`Moderation Commands`)
       .setDescription(helpAnnouncement)
-      .addField(`j.ban [@person]`, `This will ban a user`, false)
+      .addField(
+        `j.ban [@person]`,
+        `This command will ban a user from your server.`,
+        false
+      )
       .addField(
         `j.eat`,
-        `Sets a role that Jeetbot will send his cat Ffej to eat all their messages`,
+        `Jeetbot will tell his cat, Ffej, to watch all messages from a role you assign. Ffej has a 50% chance to eat all messages sent from this role you assign.`,
         false
       )
       .addField(
@@ -57,5 +61,9 @@ module.exports = async (msg) => {
       .setColor(`#68a065`);
 
     await msg.channel.send(embed);
+  } else {
+    await msg.channel.send(
+      `${msg.author.tag} does not have privileges to see these commands.`
+    );
   }
 };
