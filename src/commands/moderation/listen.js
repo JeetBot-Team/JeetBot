@@ -1,12 +1,14 @@
 const Discord = require(`discord.js`);
 const ServerInfo = require(`../../database/models/dbdiscordserverinfo`);
+const { logger } = require(`../../utils/botUtils`);
 // const { guildListenInfoUpdated } = require("../../redux/guildsSlice");
 // need to add case when the bot goes down, to re-activate the listen bot on boot up
+// fixes for later
 
 module.exports = async (msg, args, store) => {
   if (msg.member.hasPermission([`MANAGE_MESSAGES`])) {
     if (msg.author.bot) return;
-    console.log(
+    logger.info(
       `${msg.author.username} can manage messages from Discord Server: ${msg.guild}`
     );
 
@@ -33,7 +35,7 @@ module.exports = async (msg, args, store) => {
     }
 
     collector.on(`collect`, async (m, col) => {
-      console.log(
+      logger.info(
         `\nChannel: ` +
           msg.channel.name +
           `\nUser: ` +
@@ -56,7 +58,7 @@ module.exports = async (msg, args, store) => {
           m.content.indexOf(`>`) + 1
         );
 
-        console.log(`Listen Server ID has been collected: `, listen_channelID);
+        logger.info(`Listen Server ID has been collected: ${listen_channelID}`);
 
         msg.channel.send(
           `${msg.author}, Okay! I'll send messages to ${listen_channelName}.\nIf you want to change where I'm sending messages to, type j.channel #channel\nIf you want me to stop listening for messages, type j.done.`
@@ -80,7 +82,7 @@ module.exports = async (msg, args, store) => {
           msg.author.id === m.author.id
         ) {
           msg.channel.send(`${msg.author}, I'm done listening.`);
-          console.log(
+          logger.info(
             `${msg.author} has turned off the message collector in ${msg.guild}`
           );
           collector.stop();
@@ -98,14 +100,14 @@ module.exports = async (msg, args, store) => {
 
       if (msg.author.id === m.author.id && m.content.startsWith(`j.done`)) {
         msg.channel.send(`${msg.author}, I'm done listening.`);
-        console.log(
+        logger.info(
           `${msg.author} has turned off the message collector in ${msg.guild}`
         );
         collector.stop();
       }
     });
   } else {
-    console.log(`This member cannot access j.listen.`);
+    logger.warn(`This member cannot access j.listen.`);
     return msg.channel.send(
       `${msg.author.username} does not have the authority to use j.listen.`
     );

@@ -1,11 +1,11 @@
 const Discord = require(`discord.js`);
 const ServerInfo = require(`../../database/models/dbdiscordserverinfo`);
-const { guildEatRoleUpdated } = require(`../../redux/guildsSlice`);
-const { serverCache } = require(`../../utils/botUtils`);
+const { guildDataUpdated } = require(`../../redux/guildsSlice`);
+const { serverCache, logger } = require(`../../utils/botUtils`);
 
 module.exports = async (msg, args, store) => {
   if (msg.member.hasPermission([`MANAGE_ROLES`])) {
-    console.log(
+    logger.info(
       `${msg.author.username} can manage roles from Discord Server: ${msg.guild}`
     );
 
@@ -16,25 +16,31 @@ module.exports = async (msg, args, store) => {
     let collector = new Discord.MessageCollector(msg.channel, filter);
 
     collector.on(`collect`, async (m, col) => {
-      console.log(
-        `\nChannel: ` +
-          msg.channel.name +
-          `\nUser: ` +
-          m.author.tag +
-          `\nMessage: ` +
-          m.content
+      logger.info(
+        `\nChannel: ${msg.channel.name}\nUser: ${m.author.tag}\nMessage: ${m.content}`
       );
 
       if (msg.author.id === m.author.id && m.content.includes(`j.this`)) {
-        let roleID = m.content.slice(
-          m.content.indexOf(`&`) + 1,
-          m.content.indexOf(`>`)
-        );
+        let roleID = undefined;
+        const regex = /([<@&\d>])+/;
+        roleID = m.content.match(regex);
 
-        role = msg.guild.roles.cache.find((role) => role.id === role.id);
+        if (roleID) {
+          roleID = roleID[0].slice(3, roleID[0].length - 1);
+        } else {
+          logger.error(`Incorrect input after j.this`);
+          msg.channel.send(
+            `${msg.author}, you've entered incorrect input after j.this. Please enter a valid role.\nPlease type your answer in this format: **j.this @role**\nIf you do not want to change the message, type in **j.stop**`
+          );
+          return;
+        }
+
+        const role = m.guild.roles.cache.find((role) => role.id === roleID);
 
         if (role) {
-          console.log(`The role Ffej will eat is `, `${roleID}`);
+          logger.info(
+            `The role Ffej will eat is ${role.name} with an ID: ${role.id}`
+          );
 
           try {
             let guildInfo = await ServerInfo.findOne({
@@ -43,17 +49,18 @@ module.exports = async (msg, args, store) => {
 
             guildInfo.EatRole = roleID;
             await guildInfo.save();
-            store.dispatch(guildEatRoleUpdated(serverCache(guildInfo)));
+            store.dispatch(guildDataUpdated(serverCache(guildInfo)));
 
             msg.channel.send(
-              `${msg.author}, I've told Ffej to bully users with the role you've mentioned.`
+              `${msg.author}, I've told Ffej to bully users with the ${role.name} role you've mentioned.`
             );
 
             collector.stop();
           } catch (err) {
-            console.log(err);
+            logger.error(err);
           }
         } else {
+          logger.error(`Role does not exist`);
           msg.channel.send(
             `${msg.author}, That is not a valid role on your server. Please enter a valid role.\nPlease type your answer in this format: **j.this @role**\nIf you do not want to change the message, type in **j.stop**`
           );
@@ -68,7 +75,7 @@ module.exports = async (msg, args, store) => {
       }
     });
   } else {
-    console.log(`This member cannot tell Ffej which role to eat`);
+    logger.warn(`This member cannot tell Ffej which role to eat`);
     msg.channel.send(
       `${msg.author.username} does not have the authority to tell Ffej what to do.`
     );

@@ -1,11 +1,11 @@
 const Discord = require(`discord.js`);
 const ServerInfo = require(`../../database/models/dbdiscordserverinfo`);
-const { guildRoleEmojiUpdated } = require(`../../redux/guildsSlice`);
-const { serverCache } = require(`../../utils/botUtils`);
+const { guildDataUpdated } = require(`../../redux/guildsSlice`);
+const { serverCache, logger } = require(`../../utils/botUtils`);
 
 module.exports = async (msg, args, store) => {
   if (msg.member.hasPermission([`MANAGE_ROLES`])) {
-    console.log(
+    logger.info(
       `${msg.author.username} can add roles and add emojis from Discord Server: ${msg.guild}`
     );
 
@@ -16,21 +16,33 @@ module.exports = async (msg, args, store) => {
     let collector = new Discord.MessageCollector(msg.channel, filter);
 
     collector.on(`collect`, async (m, col) => {
-      console.log(
-        `\nChannel: ` +
-          msg.channel.name +
-          `\nUser: ` +
-          m.author.tag +
-          `\nMessage: ` +
-          m.content
+      logger.info(
+        `\nChannel: ${msg.channel.name}\nUser: ${m.author.tag}\nMessage: ${m.content}`
       );
 
       if (msg.author.id === m.author.id && !isNaN(m.content)) {
-        let roleEmojiMsgId = m.content.slice(0);
+        const regex = /([<\d>])+/;
+        let roleEmojiMsgId;
+        roleEmojiMsgId = m.content.match(regex);
+        // ask user to enter channel id where the message is
+        // ask user to enter message id
 
-        console.log(
-          `roleEmojiMsgId has been collected below`,
-          `\n ${roleEmojiMsgId}`
+        // should fetch for message to see if it exists
+        // can do a validation here to check if it's an actual message
+        // check for partials
+
+        if (roleEmojiMsgId) {
+          roleEmojiMsgId = roleEmojiMsgId[0];
+        } else {
+          logger.error(`Message was not found`);
+          msg.channel.send(
+            `${msg.author}, your entry was invalid.\nPlease enter the message ID (it should contain only numbers)`
+          );
+          return;
+        }
+
+        logger.info(
+          `roleEmojiMsgId has been collected below\n ${roleEmojiMsgId}`
         );
 
         msg.channel.send(
@@ -43,24 +55,52 @@ module.exports = async (msg, args, store) => {
 
         guildInfo.RoleReactions.Message_ID = roleEmojiMsgId;
 
-        store.dispatch(guildRoleEmojiUpdated(serverCache(guildInfo)));
+        store.dispatch(guildDataUpdated(serverCache(guildInfo)));
         await guildInfo.save();
       }
 
       if (msg.author.id === m.author.id && m.content.startsWith(`<:`)) {
-        let roleEmojiMapping = m.content.slice(2, m.content.length - 1);
-        let emojiID = roleEmojiMapping.slice(
-          roleEmojiMapping.indexOf(`:`) + 1,
-          roleEmojiMapping.indexOf(`>`)
-        );
-        let roleID = roleEmojiMapping.slice(roleEmojiMapping.indexOf(`&`) + 1);
+        const regex = /([(<@&|:)\d>])+/g;
+        let roleEmojiMapping = m.content.match(regex);
 
-        console.log(`This is the Role Emoji Mapping: `, roleEmojiMapping);
-        console.log(`This is the Emoji ID: `, emojiID);
-        console.log(`This is the Role ID `, roleID);
+        logger.info(roleEmojiMapping);
+
+        let emojiID = roleEmojiMapping[1].slice(
+          1,
+          roleEmojiMapping[1].length - 1
+        );
+        let roleID = roleEmojiMapping[2].slice(
+          3,
+          roleEmojiMapping[2].length - 1
+        );
+
+        // do validation checks
+        if (emojiID) {
+          // do a emoji ID check
+        } else {
+          logger.error(`Invalid input for emojiID`);
+          msg.channel.send(
+            `${msg.author}, the emoji entered was not recognized.\nPlease follow this format: emoji @role`
+          );
+          return;
+        }
+
+        if (roleID) {
+          // do a role ID check
+        } else {
+          logger.error(`Invalid input for roleID`);
+          msg.channel.send(
+            `${msg.author}, the emoji entered was not recognized.\nPlease follow this format: emoji @role`
+          );
+          return;
+        }
+
+        logger.info(
+          `\nThis is the Role Emoji Mapping: ${roleEmojiMapping}\nThis is the Emoji ID: ${emojiID}\nThis is the Role ID: ${roleID}`
+        );
 
         msg.channel.send(
-          `I've collected an emoji and role! Type j.stop if you're done, otherwise keep adding roles.`
+          `I've collected an emoji and role! Type **j.stop** if you're done, otherwise keep adding roles.`
         );
 
         let guildInfo = await ServerInfo.findOne({
@@ -71,6 +111,7 @@ module.exports = async (msg, args, store) => {
           [emojiID]: roleID,
         };
 
+        // redo this search through objects
         if (guildInfo.RoleReactions.RoleMappings) {
           for (let key in guildInfo.RoleReactions.RoleMappings) {
             if (guildInfo.RoleReactions.RoleMappings[key] === roleID) {
@@ -88,9 +129,10 @@ module.exports = async (msg, args, store) => {
 
         try {
           await guildInfo.save();
-          console.log(`We've saved the role emoji into the Database`);
+          store.dispatch(guildDataUpdated(serverCache(guildInfo)));
+          logger.info(`We've saved the role emoji into the Database`);
         } catch (err) {
-          console.log(err);
+          logger.error(err);
         }
       }
 
@@ -103,12 +145,12 @@ module.exports = async (msg, args, store) => {
           server_id: msg.channel.guild.id,
         });
 
-        store.dispatch(guildRoleEmojiUpdated(serverCache(guildInfo)));
+        store.dispatch(guildDataUpdated(serverCache(guildInfo)));
         collector.stop();
       }
     });
   } else {
-    console.log(`This member cannot add emoji role mappings`);
+    logger.warn(`This member cannot add emoji role mappings`);
     return msg.channel.send(
       `${msg.author.username} does not have the authority to edit the role emoji mappings`
     );

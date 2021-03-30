@@ -1,3 +1,5 @@
+const { logger } = require(`../../utils/botUtils`);
+
 const eightBall = [
   `As I see it, yes.`,
   `Ask again later.`,
@@ -15,5 +17,5 @@ module.exports = async (msg, args) => {
   const i = Math.floor(Math.random() * eightBall.length);
   const reply = eightBall[i];
   await msg.channel.send(`${msg.author} ${reply} 🎱`);
-  console.log(`8 Ball has made a prediction: `, reply);
+  logger.info(`8 Ball has made a prediction: ${reply}`);
 };

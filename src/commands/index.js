@@ -3,6 +3,7 @@
 // info commands
 const avatar = require(`./info/avatar`);
 const help = require(`./info/help`);
+const modhelp = require(`./info/modhelp`);
 const ping = require(`./info/ping`);
 const serverInfo = require(`./info/serverInfo`);
 const userInfo = require(`./info/userInfo`);
@@ -18,13 +19,14 @@ const patpat = require(`./fun/patpat`);
 // moderation commands
 const ban = require(`./moderation/ban`);
 const eat = require(`./moderation/eat`);
-const edit = require(`./moderation/edit`);
+const gatekeep = require(`./moderation/gatekeep`);
 const kick = require(`./moderation/kick`);
 const listen = require(`./moderation/listen`);
 const mute = require(`./moderation/mute`);
 const prune = require(`./moderation/prune`);
 const roleEmoji = require(`./moderation/roleEmoji`);
 const serverClock = require(`./moderation/serverClock`);
+const welcomeEdit = require(`./moderation/welcomeEdit`);
 
 // Prefix
 const PREFIX = process.env.PREFIX || `j.`;
@@ -42,13 +44,14 @@ const commands = {
   help,
   embed,
   dice,
-  edit,
-  welcomeEdit: edit,
+  welcomeEdit,
   roleemoji: roleEmoji,
   listen,
   eat,
   patpat,
   clock: serverClock,
+  gatekeep,
+  modhelp,
 };
 
 module.exports = async (msg, store) => {

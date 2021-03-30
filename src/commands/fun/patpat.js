@@ -1,3 +1,5 @@
+const { logger } = require(`../../utils/botUtils`);
+
 const patpat = [
   `Hang in there.`,
   `Don't give up.`,
@@ -31,5 +33,5 @@ module.exports = async (msg, args) => {
     await msg.channel.send(`${reply} 💖`);
   }
 
-  console.log(`Jeet encouraged someone: `, reply);
+  logger.info(`Jeet encouraged someone: ${reply}`);
 };

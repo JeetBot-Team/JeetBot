@@ -1,16 +1,16 @@
 # modules
 node_modules
+.eslintcache
 
-# env
+# privacy
 .env
 
 # passwords
 jeetbot.pem
 
-# misc
+# in the works
 pending
 marketing
-todo.txt
 
-# error reports
-.eslintcache
+# test files
+test.js

@@ -1,6 +1,8 @@
+const { logger } = require(`../../utils/botUtils`);
+
 module.exports = async (msg) => {
   if (!msg.mentions.users.size) {
-    console.log(`Moderator did not tag a user when using mute function`);
+    logger.warn(`Moderator did not tag a user when using mute function`);
     return msg.channel.send(`You need to tag a user in order to mute them!`);
   }
 
@@ -14,5 +16,5 @@ module.exports = async (msg) => {
   const taggedUser = msg.mentions.users.first();
 
   await msg.channel.send(`You have muted ${taggedUser}`);
-  console.log(`Moderator has muted someone!`);
+  logger.info(`Moderator has muted someone!`);
 };
