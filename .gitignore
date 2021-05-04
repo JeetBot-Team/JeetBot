@@ -4,6 +4,8 @@ node_modules
 
 # privacy
 .env
+
+# passwords
 jeetbot.pem
 
 # in the works

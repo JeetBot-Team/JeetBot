@@ -29,7 +29,7 @@ const serverClock = require(`./moderation/serverClock`);
 const welcomeEdit = require(`./moderation/welcomeEdit`);
 
 // Prefix
-const PREFIX = process.env.PREFIX;
+const PREFIX = process.env.PREFIX || `j.`;
 
 const commands = {
   ping,
