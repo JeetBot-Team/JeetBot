@@ -1,6 +1,6 @@
 const Discord = require(`discord.js`);
 const ServerInfo = require(`../../database/models/dbdiscordserverinfo`);
-const { guildDataUpdated } = require(`../../redux/guildsSlice`);
+const { guildDataUpdated, guildsSelector } = require(`../../redux/guildsSlice`);
 const { serverCache, logger } = require(`../../utils/botUtils`);
 
 module.exports = async (msg, args, store) => {
@@ -9,9 +9,32 @@ module.exports = async (msg, args, store) => {
       `${msg.author.username} can add roles and add emojis from Discord Server: ${msg.guild}`
     );
 
-    msg.channel.send(
-      `${msg.author}, which message would you like to use for your role reactions?\nCopy the ID of the message you want to use.`
+    let clientGuildInfo = guildsSelector.selectById(
+      store.getState(),
+      msg.guild.id
     );
+
+    let roleEmojiMessages = undefined;
+
+    // ask user to enter channel id where the message is
+    // ask user to enter message id
+    // should list out the message binding and the role emojis for that message
+    if (clientGuildInfo.RoleReactions) {
+      roleEmojiMessages = clientGuildInfo.RoleReactions;
+      msg.channel.send(
+        `${msg.author}, you have an existing role emoji message for this Discord server.\nWould you like to edit the following settings:
+        \nj.editRoleMsg - Edits the message where role emojis will be apply
+        \nj.addRoleEmoji - Adds a Role Emoji to the existing Message
+        \nj.delRoleEmoji - Deletes a Role Emoji of your selection
+        \nj.editRoleAll - Clears the existing message and starts a brand new one
+        \nj.stop - Exits out of the current menu`
+      );
+    } else {
+      msg.channel.send(
+        `${msg.author}, which message would you like to use for your role reactions?\nCopy the ID of the message you want to use.`
+      );
+    }
+
     let filter = (m) => !m.author.bot;
     let collector = new Discord.MessageCollector(msg.channel, filter);
 
@@ -24,8 +47,6 @@ module.exports = async (msg, args, store) => {
         const regex = /([<\d>])+/;
         let roleEmojiMsgId;
         roleEmojiMsgId = m.content.match(regex);
-        // ask user to enter channel id where the message is
-        // ask user to enter message id
 
         // should fetch for message to see if it exists
         // can do a validation here to check if it's an actual message
