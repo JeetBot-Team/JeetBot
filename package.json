@@ -11,7 +11,8 @@
     "lint": "eslint ./src/",
     "lintfix": "eslint --fix ./src/",
     "start": "node src/index.js",
-    "test": "jest"
+    "test": "jest",
+    "dev": "nodemon src/index.js"
   },
   "author": "Julia Kyung & Tam Nguyen",
   "license": "MIT",
@@ -33,6 +34,7 @@
     "lint-staged": "^10.5.3",
     "mquery": "^3.2.3",
     "node-notifier": "^9.0.0",
+    "nodemon": "^2.0.12",
     "pino-pretty": "^4.3.0",
     "prettier": "^2.2.1"
   },
