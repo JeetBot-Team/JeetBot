@@ -1,4 +1,4 @@
-module.exports = {
+export default {
   dev: true,
   prod: false,
-};
+}
