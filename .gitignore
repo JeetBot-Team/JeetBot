@@ -11,6 +11,10 @@ jeetbot.pem
 # in the works
 pending
 marketing
-
-# test files
 test.js
+
+# build folder
+build
+
+# dev environment
+.DS_Store
