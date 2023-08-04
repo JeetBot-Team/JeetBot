@@ -14,3 +14,6 @@ marketing
 
 # test files
 test.js
+
+# macOS
+.DS_Store
